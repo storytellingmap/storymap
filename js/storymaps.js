@@ -1,14 +1,22 @@
 import * as THREE from "three";
 import * as GEOLIB from "geolib";
-
+// import { resize } from "./helpers";
 import { MapControls } from "three/examples/jsm/controls/OrbitControls";
+// import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils";
+
 import Stats from "three/examples/jsm/libs/stats.module";
 
-//global variables
-let scene, camera, renderer, controls, iR, stats, color_buildings;
+//configuration and setup variables
+let color_buildings;
 
-// const center = [3.720708, 51.052912]; //ghent
-const center = [3.227183, 51.209651]; //bruges
+//general threejs variables
+let scene, camera, renderer, controls, stats;
+
+//storymap specific variables
+let city_mesh, building_mesh, grid, helper;
+const center = [3.227183, 51.209651]; //bruges || [3.720708, 51.052912]; //ghent
+// const raycaster = new THREE.Raycaster();
+// const pointer = new THREE.Vector2();
 
 function initialize(config) {
 	if (!config) {
@@ -40,6 +48,14 @@ function initialize(config) {
 	);
 	camera.position.set(8, 4, 1);
 
+	//RAYCASTING
+	// const geometryHelper = new THREE.ConeGeometry(20, 100, 3);
+	// geometryHelper.translate(0, 50, 0);
+	// geometryHelper.rotateX(Math.PI / 2);
+	// helper = new THREE.Mesh(geometryHelper, new THREE.MeshNormalMaterial());
+	// scene.add(helper);
+	// container.addEventListener("pointermove", onPointerMove);
+
 	// //initialize group
 	// iR = new THREE.Group();
 	// iR = "Interactive Root";
@@ -63,21 +79,22 @@ function initialize(config) {
 	const lightHelper1 = new THREE.PointLightHelper(light1);
 	const lightHelper2 = new THREE.PointLightHelper(light2);
 
-	const gridHelper = new THREE.GridHelper(
+	//const gridHelper
+	grid = new THREE.GridHelper(
 		100,
 		150,
 		new THREE.Color(0x555555),
 		new THREE.Color(0x333333),
 	);
 	// scene.add(lightHelper0, lightHelper1, lightHelper2);
-	scene.add(gridHelper);
+	scene.add(grid);
 
 	//initialize geometry
-	const geometry = new THREE.BoxGeometry(1, 1, 1);
-	const material = new THREE.MeshPhongMaterial({
-		color: 0x00ff00,
-	});
-	const mesh = new THREE.Mesh(geometry, material);
+	// const geometry = new THREE.BoxGeometry(1, 1, 1);
+	// const material = new THREE.MeshPhongMaterial({
+	// 	color: 0x00ff00,
+	// });
+	// const mesh = new THREE.Mesh(geometry, material);
 	// scene.add(mesh);
 
 	//initialize renderer
@@ -102,6 +119,12 @@ function initialize(config) {
 	container.appendChild(stats.dom);
 }
 
+function resize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
 function animate() {
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
@@ -109,61 +132,54 @@ function animate() {
 	stats.update();
 }
 
-function resize() {
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-	renderer.setSize(window.innerWidth, window.innerHeight);
+async function generate() {
+	// LOAD GEOJSON DATA
+	let data = await loadGeoJsonAsync();
+	// console.log(data);
+
+	// LOADBUILDINGS
+	//foreach building, call the addBuilding function
+	data.forEach((element) => {
+		if (element.properties.building) {
+			create3dObject(element);
+			// addBuilding(
+			// 	element.geometry.coordinates,
+			// 	element.properties["building:levels"],
+			// 	element.properties,
+			// );
+			// console.log("bla");
+		}
+	});
 }
 
-function loadData() {
-	fetch("./data/bruges.geojson").then((res) => {
-		res.json().then((data) => {
-			// return data.features;
-			// console.log(data.features[0].geometry.coordinates);
-			loadBuildings(data.features);
+async function loadGeoJsonAsync() {
+	return await fetch("./data/bruges.geojson").then((response) => {
+		return response.json().then((data) => {
+			return data.features;
 		});
 	});
 }
 
-function loadBuildings(data) {
-	data.forEach((element) => {
-		if (element.properties.building) {
-			addBuilding(
-				element.geometry.coordinates,
-				element.properties["building:levels"],
-				element.properties,
-			);
-			// console.log("bla");
-		}
-	});
-	// console.log(data);
-	// for (let i = 0; i < 1; i++) {
-	// 	console.log(data[i]);
-	// 	// if (data.properties) {
-	// 	// 	console.log("bla");
-	// 	// }
-	// }
+function create3dObject(data) {
+	let coordinates = data.geometry.coordinates;
+	let building_levels = data.properties["building:levels"] || 1; //if building:levels property exists use it, otherwise use 1
+	let properties = data.properties;
+
+	if (properties.building) {
+		//if data is a building property (if it's a building)
+		generateBuilding(coordinates, building_levels);
+	}
 }
 
-function addBuilding(coordinates, height = 1, info) {
-	//a building's coordinates are an array of an array of coordinates, with the latter being a polygon.
-	//buildings can have multiple polygons.
-	//so you need nested for each -> one per polygon and one for all points in the polygon
-	// console.log(coordinates);
-	// coordinates.forEach((element) => {});
-	// let arrayOfBuildings;
-	// let counter = 0;
-
-	generateBuilding(coordinates);
-}
-
-function generateBuilding(coordinates) {
+function generateBuilding(coordinates, height = 1) {
 	//single building with multiple polygons
+	let buildingGeometry = new THREE.BufferGeometry();
 	// arrayOfPolygons["group" + counter] = new THREE.Group();
 
+	//for each of the coordinate groups
 	coordinates.forEach((polygon, index) => {
+		//generate shape
 		let shape = new THREE.Shape(); //only a single polygon?
-
 		polygon.forEach((coordinates, index) => {
 			let coords = normalizeCoordinates(coordinates, center);
 			if (index == 0) {
@@ -174,7 +190,8 @@ function generateBuilding(coordinates) {
 			// console.log(coordinates);
 			// shape.moveTo(coordinates[0], coordinates[1]);
 		});
-		let height = 1;
+
+		// let height = 1;
 		let geometry = new THREE.ExtrudeBufferGeometry(shape, {
 			curveSegments: 1,
 			depth: 0.05 * height,
@@ -189,8 +206,13 @@ function generateBuilding(coordinates) {
 			color: color_buildings,
 		});
 		const mesh = new THREE.Mesh(geometry, material);
+
+		mesh.updateMatrix();
+		// buildingGeometry.merge(mesh);
+
 		// console.log(mesh);
 		scene.add(mesh);
+
 		// console.log("end of polygon");
 		// arrayOfPolygons["group" + counter].add(shape);
 		// element[0];
@@ -214,4 +236,4 @@ function normalizeCoordinates(objectPosition, centerPosition) {
 	return [-x / 100, y / 100];
 }
 
-export { initialize, animate, loadData };
+export { initialize, animate, generate };

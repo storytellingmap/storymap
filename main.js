@@ -9,4 +9,5 @@ const config = {
 
 storymaps.initialize(config);
 storymaps.animate();
-storymaps.loadData();
+// storymaps.loadData();
+storymaps.generate();
