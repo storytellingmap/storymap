@@ -8,6 +8,18 @@ let scene;
 let camera;
 let renderer;
 let controls;
+const material = new THREE.MeshPhongMaterial({
+	color: 0x00ff00,
+	transparent: true,
+	opacity: 0.25,
+});
+// var material2 = new THREE.MeshLambertMaterial({
+// 	color: 0x0000ff,
+// 	transparent: true,
+// 	opacity: 0.5,
+// });
+
+let ground; //global ground
 
 function initialize() {
 	//local variables
@@ -42,9 +54,10 @@ function initialize() {
 	scene.add(light2);
 
 	//initialize helpers
-	const lightHelper0 = new THREE.PointLightHelper(light0);
-	const lightHelper1 = new THREE.PointLightHelper(light1);
-	const lightHelper2 = new THREE.PointLightHelper(light2);
+	// const lightHelper0 = new THREE.PointLightHelper(light0);
+	// const lightHelper1 = new THREE.PointLightHelper(light1);
+	// const lightHelper2 = new THREE.PointLightHelper(light2);
+	// scene.add(lightHelper0, lightHelper1, lightHelper2);
 
 	const gridHelper = new THREE.GridHelper(
 		100,
@@ -55,7 +68,6 @@ function initialize() {
 
 	const grid = new THREE.GridHelper();
 
-	scene.add(lightHelper0, lightHelper1, lightHelper2);
 	scene.add(gridHelper);
 
 	//initialize geometry
@@ -98,29 +110,19 @@ function resize() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function getData() {
-	fetch("./data/ghent.geojson").then((res) => {
-		res.json().then((data) => {
-			// return data.features;
-			// console.log(data.features[0].geometry.coordinates);
-			loadBuildings(data.features);
-		});
-	});
-}
-
-function createMesh2() {
+function createGround() {
 	const shape = new THREE.Shape();
 	// camera.position.set(new THREE.Vector3(1, 1, 1));
-	// shape.moveTo(0, 0);
-	// shape.lineTo(0, 2.4);
-	// shape.lineTo(4, 4);
-	// shape.lineTo(2.4, 0);
+	shape.moveTo(0, 0);
+	shape.lineTo(0, 100);
+	shape.lineTo(100, 100);
+	shape.lineTo(100, 0);
 	// shape.lineTo(0, 0);
 
-	shape.moveTo(3.7256676, 0);
-	shape.lineTo(3.7257336, 0);
-	shape.lineTo(1, 1);
-	shape.lineTo(0, 1);
+	// shape.moveTo(3.7256676, 0);
+	// shape.lineTo(3.7257336, 0);
+	// shape.lineTo(1, 1);
+	// shape.lineTo(0, 1);
 	// shape.lineTo(0, 0);
 
 	// shape.moveTo(3.7256676, 51.0442347);
@@ -136,60 +138,79 @@ function createMesh2() {
 	// shape.lineTo(3.7256676, 0);
 
 	const geometry = new THREE.ShapeGeometry(shape);
+	geometry.rotateX(Math.PI / 2);
+	geometry.rotateZ(Math.PI);
+	geometry.translate(50, 0.05, -50);
 
-	const mesh = new THREE.Mesh(geometry, material);
+	// const mesh = new THREE.Mesh(geometry, material);
+	ground = new THREE.Mesh(geometry, material);
+	ground.name = "GROUND";
 	// mesh.translateY(-51.0442347);
 	// mesh.setRotationFromAxisAngle(-90);
-	scene.add(mesh);
+	scene.add(ground);
 }
 
-function createBuilding() {
-	const shape = new THREE.Shape();
-
-	shape.moveTo(3.7256676, 51.0442347);
-	shape.lineTo(3.7257336, 51.044234);
-	shape.lineTo(3.7257315, 51.0441559);
-	shape.lineTo(3.7256655, 51.0441566);
-	shape.lineTo(3.7256676, 51.0442347);
-
-	const geometry = new THREE.ShapeGeometry(shape);
-
-	const material = new THREE.MeshPhongMaterial({
-		color: 0x00ff00,
+function addLine() {
+	const material2 = new THREE.LineBasicMaterial({
+		color: 0xff0000,
 	});
 
-	const mesh = new THREE.Mesh(geometry, material);
-	scene.add(mesh);
+	const points = [];
+	points.push(new THREE.Vector3(-10, 0, 0));
+	points.push(new THREE.Vector3(0, 10, 0));
+	points.push(new THREE.Vector3(10, 0, 0));
 
-	// const extrudeSettings = {
-	// 	steps: 1,
-	// 	depth: 1,
-	// 	bevelEnabled: false,
-	// 	// bevelThickness: 1,
-	// 	// bevelSize: 1,
-	// 	// bevelOffset: 0,
-	// 	// bevelSegments: 1,
-	// };
-	// const geometry2 = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+	const line = new THREE.Line(geometry, material2);
+	scene.add(line);
+}
+let started = false;
+let line = null;
+
+function addRaycaster() {
+	const raycaster = new THREE.Raycaster(); //raycaster
+	const mousePos = new THREE.Vector2(); //mouse pos
+	const mouseMove = new THREE.Vector2(); //last mouse movement position
+	let draggable; //last clicked object;
+
+	window.addEventListener("click", (event) => {
+		// calculate mouse position in normalized device coordinates
+		// (-1 to +1) for both components
+		mousePos.x = (event.clientX / window.innerWidth) * 2 - 1;
+		mousePos.y = -(event.clientY / window.innerHeight) * 2 + 1;
+		// console.log(mousePos);
+
+		raycaster.setFromCamera(mousePos, camera);
+		let found = raycaster.intersectObjects(scene.children);
+		// console.log(found.length);
+		if (found.length > 0) {
+			// console.log(1);
+			found.forEach((ray) => {
+				// console.log(ray);
+				if (ray.object.name == "GROUND") {
+					createLine(ray);
+				}
+			});
+		}
+	});
 }
 
-function normalizeCoordinates(objPosi, centerPosi) {
-	// Get GPS distance
-	let dis = GEOLIB.getDistance(objPosi, centerPosi);
+function createLine(coordinates) {
+	console.log(coordinates.point);
+	// coordinates.forEach((element) => {
+	// 	// console.log(element.point);
+	// 	console.log("CREATE-LINE-()");
+	// 	console.log(element);
+	// });
 
-	// Get bearing angle
-	let bearing = GEOLIB.getRhumbLineBearing(objPosi, centerPosi);
-
-	// Calculate X by centerPosi.x + distance * cos(rad)
-	let x = centerPosi[0] + dis * Math.cos((bearing * Math.PI) / 180);
-
-	// Calculate Y by centerPosi.y + distance * sin(rad)
-	let y = centerPosi[1] + dis * Math.sin((bearing * Math.PI) / 180);
-
-	// Reverse X (it work)
-	return [-x / 100, y / 100];
+	// let line = new THREE.LineBasicMaterial({
+	// 	color: 0xff0000,
+	// });
 }
 
 initialize();
 animate();
-createMesh2();
+createGround();
+// addLine();
+addRaycaster();

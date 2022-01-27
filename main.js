@@ -1,4 +1,5 @@
 import * as storymaps from "./js/storymaps";
+// import * as storypath from "./js/storypath";
 
 const config = {
 	container: "container",
