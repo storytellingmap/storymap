@@ -2,6 +2,7 @@ import * as THREE from "three";
 import * as GEOLIB from "geolib";
 
 import { MapControls } from "three/examples/jsm/controls/OrbitControls";
+import { Vector3 } from "three";
 
 //global variables
 let scene;
@@ -18,8 +19,6 @@ const material = new THREE.MeshPhongMaterial({
 // 	transparent: true,
 // 	opacity: 0.5,
 // });
-
-let ground; //global ground
 
 function initialize() {
 	//local variables
@@ -143,28 +142,13 @@ function createGround() {
 	geometry.translate(50, 0.05, -50);
 
 	// const mesh = new THREE.Mesh(geometry, material);
-	ground = new THREE.Mesh(geometry, material);
+	const ground = new THREE.Mesh(geometry, material);
 	ground.name = "GROUND";
 	// mesh.translateY(-51.0442347);
 	// mesh.setRotationFromAxisAngle(-90);
 	scene.add(ground);
 }
 
-function addLine() {
-	const material2 = new THREE.LineBasicMaterial({
-		color: 0xff0000,
-	});
-
-	const points = [];
-	points.push(new THREE.Vector3(-10, 0, 0));
-	points.push(new THREE.Vector3(0, 10, 0));
-	points.push(new THREE.Vector3(10, 0, 0));
-
-	const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-	const line = new THREE.Line(geometry, material2);
-	scene.add(line);
-}
 let started = false;
 let line = null;
 
@@ -189,15 +173,27 @@ function addRaycaster() {
 			found.forEach((ray) => {
 				// console.log(ray);
 				if (ray.object.name == "GROUND") {
-					createLine(ray);
+					placeBox(ray.point);
+					// createLine(ray.point);
 				}
 			});
 		}
 	});
 }
 
+var geometry = new THREE.BufferGeometry();
+var MAX_POINTS = 500;
+
 function createLine(coordinates) {
-	console.log(coordinates.point);
+	let position = new Vector3(coordinates.x, coordinates.y, coordinates.z);
+	// let position = coordinates;
+	console.log(position);
+
+	const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+	const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+	const cube = new THREE.Mesh(geometry, material);
+	cube.position.set(position.x, position.y, position.z);
+	scene.add(cube);
 	// coordinates.forEach((element) => {
 	// 	// console.log(element.point);
 	// 	console.log("CREATE-LINE-()");
@@ -207,6 +203,43 @@ function createLine(coordinates) {
 	// let line = new THREE.LineBasicMaterial({
 	// 	color: 0xff0000,
 	// });
+}
+
+function placeBox(coordinates) {
+	let position = new Vector3(coordinates.x, coordinates.y, coordinates.z);
+	// let position = coordinates;
+	console.log(position);
+
+	const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+	const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+	const cube = new THREE.Mesh(geometry, material);
+	cube.position.set(position.x, position.y, position.z);
+	scene.add(cube);
+	// coordinates.forEach((element) => {
+	// 	// console.log(element.point);
+	// 	console.log("CREATE-LINE-()");
+	// 	console.log(element);
+	// });
+
+	// let line = new THREE.LineBasicMaterial({
+	// 	color: 0xff0000,
+	// });
+}
+
+function addLine() {
+	const material2 = new THREE.LineBasicMaterial({
+		color: 0xff0000,
+	});
+
+	const points = [];
+	points.push(new THREE.Vector3(-10, 0, 0));
+	points.push(new THREE.Vector3(0, 10, 0));
+	points.push(new THREE.Vector3(10, 0, 0));
+
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+	const line = new THREE.Line(geometry, material2);
+	scene.add(line);
 }
 
 initialize();
