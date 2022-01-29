@@ -1,7 +1,7 @@
 import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
 import * as GEOLIB from "geolib";
-import { BufferGeometryUtils as BGU } from "three/examples/jsm/utils/BufferGeometryUtils";
+import { mergeBufferGeometries } from "three/examples/jsm/utils/BufferGeometryUtils";
 
 async function loadGeoJsonAsync() {
 	return await fetch($.config.data).then((response) => {
@@ -21,7 +21,8 @@ async function generateCity() {
 	data.forEach((element) => {
 		create3dObject(element);
 		// if (element.properties.building) {
-		// 	create3dObject(element);
+		// 	generateBuildings();
+		// 	// create3dObject(element);
 		// 	// addBuilding(
 		// 	// 	element.geometry.coordinates,
 		// 	// 	element.properties["building:levels"],
@@ -30,8 +31,25 @@ async function generateCity() {
 		// 	// console.log("bla");
 		// }
 	});
+
+	// console.log($.buildingArray.length);
+	generateGlobalMesh();
 }
 
+function generateGlobalMesh() {
+	let mergedGeometry = mergeBufferGeometries($.buildingArray);
+
+	const material = new THREE.MeshPhongMaterial({
+		color: $.config.color_buildings,
+	});
+	const mesh = new THREE.Mesh(mergedGeometry, material);
+
+	mesh.updateMatrix();
+	// buildingGeometry.merge(mesh);
+
+	// console.log(mesh);
+	$.scene.add(mesh);
+}
 function create3dObject(data) {
 	let coordinates = data.geometry.coordinates;
 	let properties = data.properties;
@@ -40,8 +58,8 @@ function create3dObject(data) {
 		//if data is a building property (if it's a building)
 		let building_levels = data.properties["building:levels"] || 1; //if building:levels property exists use it, otherwise use 1
 
-		// $.buildingArray = generateBuildingV2(coordinates, building_levels);
-		generateBuildings(coordinates, building_levels);
+		$.buildingArray.push(generateBuildingV3(coordinates, building_levels));
+		// generateBuildingV2(coordinates, building_levels);
 	}
 }
 
@@ -97,7 +115,7 @@ function generateBuildingV1(coordinates, height = 1) {
 	});
 }
 
-function generateBuildings(coordinates, height = 1) {
+function generateBuildingV2(coordinates, height = 1) {
 	//each geojson "object" has multiple arrays of coordinates.
 	//the first array is the main (outer) building shape
 	//the second & third & .. are the "holes" in the building
@@ -114,12 +132,6 @@ function generateBuildings(coordinates, height = 1) {
 			buildingShape.holes.push(generateShape(points));
 			// buildingHoles.push(generateShape(points));
 		}
-
-		// console.log(buildingShape.holes);
-		// buildingHoles.forEach((hole) => {
-		// 	//for each "hole", punch it into the shape
-		// 	buildingShape.holes.push(hole);
-		// });
 	});
 
 	buildingGeometry = generateGeometry(buildingShape, height);
@@ -134,6 +146,29 @@ function generateBuildings(coordinates, height = 1) {
 
 	// console.log(mesh);
 	$.scene.add(mesh);
+}
+
+function generateBuildingV3(coordinates, height = 1) {
+	//each geojson "object" has multiple arrays of coordinates.
+	//the first array is the main (outer) building shape
+	//the second & third & .. are the "holes" in the building
+	let buildingShape, buildingGeometry; //main building
+	// let buildingHoles = []; //holes to punch out shape
+
+	coordinates.forEach((points, index) => {
+		//for each building do:
+		if (index == 0) {
+			//create main building shape
+			buildingShape = generateShape(points);
+		} else {
+			//create shape of holes in building
+			buildingShape.holes.push(generateShape(points));
+			// buildingHoles.push(generateShape(points));
+		}
+	});
+
+	buildingGeometry = generateGeometry(buildingShape, height);
+	return buildingGeometry;
 }
 
 function generateRoads(coordinates) {}
