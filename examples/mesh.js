@@ -10,9 +10,9 @@ let camera;
 let renderer;
 let controls;
 
-let local3js = {
-	scene: new THREE.Scene(),
-};
+// let local3js = {
+// 	scene: new THREE.Scene(),
+// };
 
 const material = new THREE.MeshPhongMaterial({
 	color: 0x00ff00,
