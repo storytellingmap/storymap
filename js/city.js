@@ -137,7 +137,7 @@ function animate() {
 	stats.update();
 }
 
-async function generate() {
+async function generateCity() {
 	// LOAD GEOJSON DATA
 	let data = await loadGeoJsonAsync();
 	// console.log(data);
@@ -243,4 +243,4 @@ function normalizeCoordinates(objectPosition, centerPosition) {
 	return [-x / 100, y / 100];
 }
 
-export { initialize, animate, generate };
+export { initialize, animate, generateCity as generate };

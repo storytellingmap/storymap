@@ -9,16 +9,16 @@ let scene;
 let camera;
 let renderer;
 let controls;
+
+let local3js = {
+	scene: new THREE.Scene(),
+};
+
 const material = new THREE.MeshPhongMaterial({
 	color: 0x00ff00,
 	transparent: true,
 	opacity: 0.25,
 });
-// var material2 = new THREE.MeshLambertMaterial({
-// 	color: 0x0000ff,
-// 	transparent: true,
-// 	opacity: 0.5,
-// });
 
 function initialize() {
 	//local variables
@@ -92,9 +92,28 @@ function initialize() {
 	controls.maxDistance = 800;
 
 	controls.update();
+}
 
-	//initialize resize
+let SCROLL_PERCENT = 0;
+function initEventListeners() {
+	//RESIZE
 	window.addEventListener("resize", resize, false);
+
+	//ONSCROLL
+	document.addEventListener("scroll", getScrollPercentage, false);
+
+	function getScrollPercentage() {
+		SCROLL_PERCENT =
+			((document.documentElement.scrollTop || document.body.scrollTop) /
+				((document.documentElement.scrollHeight ||
+					document.body.scrollHeight) -
+					document.documentElement.clientHeight)) *
+			100;
+		document.getElementById("scrollProgress").innerText =
+			"Scroll Progress : " + SCROLL_PERCENT.toFixed(2);
+	}
+
+	//ON BUTTON PRESS
 }
 
 function animate() {
@@ -139,7 +158,7 @@ function createGround() {
 	const geometry = new THREE.ShapeGeometry(shape);
 	geometry.rotateX(Math.PI / 2);
 	geometry.rotateZ(Math.PI);
-	geometry.translate(50, 0.05, -50);
+	geometry.translate(50, 0.0001, -50); //why is threejs so retarded. why is it xzy
 
 	// const mesh = new THREE.Mesh(geometry, material);
 	const ground = new THREE.Mesh(geometry, material);
@@ -149,15 +168,56 @@ function createGround() {
 	scene.add(ground);
 }
 
-let started = false;
-let line = null;
+let arrayOfLinePoints = [];
+
+function createLine(coordinates) {
+	let position = new Vector3(coordinates.x, coordinates.y, coordinates.z);
+	arrayOfLinePoints.push(position);
+	console.log(arrayOfLinePoints);
+	if (arrayOfLinePoints.length > 1) {
+		addLine(arrayOfLinePoints);
+	}
+	console.log(scene.children);
+}
+
+function placeBox(coordinates) {
+	let position = new Vector3(coordinates.x, coordinates.y, coordinates.z);
+	// let position = coordinates;
+	console.log(position);
+
+	const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+	const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+	const cube = new THREE.Mesh(geometry, material);
+	cube.position.set(position.x, position.y + 0.04, position.z);
+	scene.add(cube);
+	// coordinates.forEach((element) => {
+	// 	// console.log(element.point);
+	// 	console.log("CREATE-LINE-()");
+	// 	console.log(element);
+	// });
+
+	// let line = new THREE.LineBasicMaterial({
+	// 	color: 0xff0000,
+	// });
+}
+
+function addLine(points) {
+	const material2 = new THREE.LineBasicMaterial({
+		color: 0xff0000,
+	});
+
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+	const line = new THREE.Line(geometry, material2);
+	scene.add(line);
+}
 
 function addRaycaster() {
 	const raycaster = new THREE.Raycaster(); //raycaster
 	const mousePos = new THREE.Vector2(); //mouse pos
 	const mouseMove = new THREE.Vector2(); //last mouse movement position
-	let draggable; //last clicked object;
 
+	// function
 	window.addEventListener("click", (event) => {
 		// calculate mouse position in normalized device coordinates
 		// (-1 to +1) for both components
@@ -173,77 +233,121 @@ function addRaycaster() {
 			found.forEach((ray) => {
 				// console.log(ray);
 				if (ray.object.name == "GROUND") {
-					placeBox(ray.point);
+					// placeBox(ray.point);
 					// createLine(ray.point);
+					onMouseDown(ray.point);
 				}
 			});
 		}
 	});
 }
 
-var geometry = new THREE.BufferGeometry();
-var MAX_POINTS = 500;
+//globals
+let LINE;
+let LINE_POSITIONS;
+let CLICKCOUNTER = 0;
+let MOVEPOS;
+function initializeDynamicLine() {
+	let geometry = new THREE.BufferGeometry();
+	let max_points = 600;
+	LINE_POSITIONS = new Float32Array(max_points * 3); //3 verts (xyz) per point
 
-function createLine(coordinates) {
-	let position = new Vector3(coordinates.x, coordinates.y, coordinates.z);
-	// let position = coordinates;
-	console.log(position);
-
-	const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-	const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-	const cube = new THREE.Mesh(geometry, material);
-	cube.position.set(position.x, position.y, position.z);
-	scene.add(cube);
-	// coordinates.forEach((element) => {
-	// 	// console.log(element.point);
-	// 	console.log("CREATE-LINE-()");
-	// 	console.log(element);
-	// });
-
-	// let line = new THREE.LineBasicMaterial({
-	// 	color: 0xff0000,
-	// });
-}
-
-function placeBox(coordinates) {
-	let position = new Vector3(coordinates.x, coordinates.y, coordinates.z);
-	// let position = coordinates;
-	console.log(position);
-
-	const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-	const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-	const cube = new THREE.Mesh(geometry, material);
-	cube.position.set(position.x, position.y, position.z);
-	scene.add(cube);
-	// coordinates.forEach((element) => {
-	// 	// console.log(element.point);
-	// 	console.log("CREATE-LINE-()");
-	// 	console.log(element);
-	// });
-
-	// let line = new THREE.LineBasicMaterial({
-	// 	color: 0xff0000,
-	// });
-}
-
-function addLine() {
-	const material2 = new THREE.LineBasicMaterial({
+	geometry.setAttribute(
+		"position",
+		new THREE.BufferAttribute(LINE_POSITIONS, 3),
+	);
+	let material = new THREE.LineBasicMaterial({
 		color: 0xff0000,
+		linewidth: 2,
 	});
 
-	const points = [];
-	points.push(new THREE.Vector3(-10, 0, 0));
-	points.push(new THREE.Vector3(0, 10, 0));
-	points.push(new THREE.Vector3(10, 0, 0));
+	LINE = new THREE.Line(geometry, material);
+	scene.add(LINE);
 
-	const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-	const line = new THREE.Line(geometry, material2);
-	scene.add(line);
+	document.addEventListener("mousemove", onMouseMove, false);
+	// document.addEventListener("mousedown", onMouseDown, false);
 }
 
+function onMouseDown(data) {
+	if (CLICKCOUNTER === 0) {
+		addPoint(data); //hack to add to identical points.
+	}
+	addPoint(data);
+}
+
+function onSaveButtonDown() {}
+
+function castRay() {
+	const raycaster = new THREE.Raycaster(); //raycaster
+	const mousePos = new THREE.Vector2(); //mouse pos
+	const mouseMove = new THREE.Vector2(); //last mouse movement position
+
+	mousePos.x = (event.clientX / window.innerWidth) * 2 - 1;
+	mousePos.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	// console.log(mousePos);
+
+	raycaster.setFromCamera(mousePos, camera);
+	let found = raycaster.intersectObjects(scene.children);
+	// console.log(found.length);
+	if (found.length > 0) {
+		// console.log(1);
+		found.forEach((ray) => {
+			// console.log(ray);
+			if (ray.object.name == "GROUND") {
+				// console.log(ray.point);
+				// placeBox(ray.point);
+				// createLine(ray.point);
+				MOVEPOS = ray.point;
+			}
+		});
+	}
+}
+// mouse move handler
+function onMouseMove(event) {
+	castRay(event);
+	// console.log(MOVEPOS);
+	// console.log(castRay(event));
+	// mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+	// mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	// mouse.z = 0;
+	// mouse.unproject(camera);
+	if (CLICKCOUNTER !== 0) {
+		updateLine(MOVEPOS);
+	}
+}
+
+// add point
+function addPoint(mouse) {
+	console.log(
+		"point nr " +
+			CLICKCOUNTER +
+			": " +
+			mouse.x +
+			" " +
+			mouse.y +
+			" " +
+			mouse.z,
+	);
+	LINE_POSITIONS[CLICKCOUNTER * 3 + 0] = mouse.x;
+	LINE_POSITIONS[CLICKCOUNTER * 3 + 1] = mouse.y;
+	LINE_POSITIONS[CLICKCOUNTER * 3 + 2] = mouse.z;
+	CLICKCOUNTER++;
+	LINE.geometry.setDrawRange(0, CLICKCOUNTER);
+	updateLine(mouse);
+}
+// update line
+function updateLine(mouse) {
+	LINE_POSITIONS[CLICKCOUNTER * 3 - 3] = mouse.x;
+	LINE_POSITIONS[CLICKCOUNTER * 3 - 2] = mouse.y;
+	LINE_POSITIONS[CLICKCOUNTER * 3 - 1] = mouse.z;
+	LINE.geometry.attributes.position.needsUpdate = true;
+}
+
+function dynamicLine(points) {}
+
 initialize();
+initEventListeners();
+initializeDynamicLine();
 animate();
 createGround();
-// addLine();
 addRaycaster();
