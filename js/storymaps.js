@@ -13,16 +13,16 @@ import { animatePath } from "./animate";
 
 function setup() {
 	initialize(); //create threejs scene, populate global variables
-	animate();
-	generateCity();
-	generatePath();
+	animate(); //animation loop
+	generateCity(); //create 3D city from geojson data
+	generatePath(); //create menu/code to draw a path in the city
 }
 
 function start() {
 	initialize(); //create threejs scene, populate global variables
 	animate();
 	generateCity();
-	animatePath();
+	animatePath(); //animates the created path from setup
 }
 
 export { setup, start, global };

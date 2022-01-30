@@ -5,16 +5,17 @@ import * as GEOLIB from "geolib";
 async function animatePath() {
 	let data = await loadPath();
 	$.lineArray = new Float32Array(600 * 3);
+
+	let drawRange = 0;
 	// console.log(data);
 	data.forEach((element, index) => {
 		$.lineArray[index * 3 + 0] = element[0];
 		$.lineArray[index * 3 + 1] = element[1];
 		$.lineArray[index * 3 + 2] = element[2];
+		drawRange += 1;
 	});
 
-	console.log($.lineArray);
-
-	drawPath();
+	drawPath(drawRange);
 }
 
 async function loadPath() {
@@ -25,7 +26,7 @@ async function loadPath() {
 	});
 }
 
-function drawPath() {
+function drawPath(drawRange) {
 	let geometry = new THREE.BufferGeometry();
 
 	geometry.setAttribute(
@@ -39,6 +40,7 @@ function drawPath() {
 	});
 
 	$.line = new THREE.Line(geometry, material);
+	$.line.geometry.setDrawRange(0, drawRange);
 	$.scene.add($.line);
 }
 
