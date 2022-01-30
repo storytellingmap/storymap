@@ -19,6 +19,7 @@ export const GLOBAL = {
 	config: {
 		debug: true,
 		data: "./data/bruges-small.geojson",
+		path: "./data/path.json",
 		container: "container",
 		citycenter: [3.227183, 51.209651],
 		color_background: 0x222222,

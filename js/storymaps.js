@@ -11,14 +11,14 @@ import { animatePath } from "./animate";
 // generatePath();
 // animatePath();
 
-function setup(config = null) {
+function setup() {
 	initialize(); //create threejs scene, populate global variables
 	animate();
 	generateCity();
 	generatePath();
 }
 
-function start(config = null) {
+function start() {
 	initialize(); //create threejs scene, populate global variables
 	animate();
 	generateCity();

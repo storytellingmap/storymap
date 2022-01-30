@@ -135,7 +135,18 @@ function addRaycaster(event) {
 }
 
 function savePath() {
-	let pathData = JSON.stringify($.lineArray);
+	let data = [];
+
+	for (let index = 0; index < $.lineClickCounter; index++) {
+		let obj = [
+			$.lineArray[index * 3 + 0],
+			$.lineArray[index * 3 + 1],
+			$.lineArray[index * 3 + 2],
+		];
+		data.push(obj);
+	}
+
+	let pathData = JSON.stringify(data);
 
 	download(pathData, "path.json", "text/plain");
 
