@@ -29,7 +29,7 @@ import * as storymaps from "./js/storymaps";
 
 storymaps.global.config = {
 	debug: true,
-	data: "./data/bruges.geojson",
+	data: "./data/bruges-complete.geojson",
 	container: "container",
 	citycenter: [3.227183, 51.209651],
 	color_background: 0x222222,

@@ -80,6 +80,68 @@
 				]
 			},
 			"id": "relation/3463609"
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"@id": "way/28262415",
+				"cycleway": "opposite",
+				"highway": "residential",
+				"lit": "yes",
+				"maxspeed": "30",
+				"motor_vehicle": "destination",
+				"name": "Elisabeth Zorghestraat",
+				"oneway": "yes",
+				"oneway:bicycle": "no",
+				"parking:lane:both": "no_parking",
+				"sett:pattern": "arc",
+				"sidewalk": "none",
+				"surface": "sett",
+				"width:carriageway": "5.0",
+				"wikidata": "Q1924880",
+				"wikipedia": "nl:Elisabeth Zorghestraat"
+			},
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[3.2305253, 51.2135618],
+					[3.230467, 51.2141234],
+					[3.2304643, 51.2142349],
+					[3.2305316, 51.2152332]
+				]
+			},
+			"id": "way/28262415"
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"@id": "way/28262426",
+				"cycleway": "opposite",
+				"highway": "residential",
+				"lit": "yes",
+				"maxspeed": "30",
+				"name": "Ropeerdstraat",
+				"oneway": "yes",
+				"oneway:bicycle": "no",
+				"parking:lane:both": "no_parking",
+				"sett:pattern": "arc",
+				"sidewalk": "both",
+				"surface": "sett",
+				"width:carriageway": "3.0",
+				"wikidata": "Q1981340",
+				"wikipedia": "nl:Ropeerdstraat"
+			},
+			"geometry": {
+				"type": "LineString",
+				"coordinates": [
+					[3.231868, 51.2152794],
+					[3.2319262, 51.2150734],
+					[3.2319984, 51.2148737],
+					[3.2320491, 51.2147354],
+					[3.2324073, 51.2138831]
+				]
+			},
+			"id": "way/28262426"
 		}
 	]
 }

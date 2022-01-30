@@ -2,6 +2,7 @@ import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
 import * as GEOLIB from "geolib";
 import { mergeBufferGeometries } from "three/examples/jsm/utils/BufferGeometryUtils";
+import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 
 async function loadGeoJsonAsync() {
 	return await fetch($.config.data).then((response) => {
@@ -11,7 +12,7 @@ async function loadGeoJsonAsync() {
 	});
 }
 
-async function generateCity() {
+async function generateCity(buildings = true, roads = true, water = true) {
 	// LOAD GEOJSON DATA
 	let data = await loadGeoJsonAsync();
 	// console.log(data);
@@ -33,23 +34,40 @@ async function generateCity() {
 	});
 
 	// console.log($.buildingArray.length);
-	generateGlobalMesh();
+	spawnBuildings();
+	spawnWater();
 }
 
-function generateGlobalMesh() {
+function spawnBuildings() {
 	let mergedGeometry = mergeBufferGeometries($.buildingArray);
 
 	const material = new THREE.MeshPhongMaterial({
 		color: $.config.color_buildings,
 	});
 	const mesh = new THREE.Mesh(mergedGeometry, material);
-
+	mesh.name = "BUILDINGS";
 	mesh.updateMatrix();
 	// buildingGeometry.merge(mesh);
 
 	// console.log(mesh);
 	$.scene.add(mesh);
 }
+
+function spawnWater() {
+	let mergedGeometry = mergeBufferGeometries($.waterArray);
+
+	const material = new THREE.MeshPhongMaterial({
+		color: 0x0000ff,
+	});
+	const mesh = new THREE.Mesh(mergedGeometry, material);
+	mesh.name = "WATER";
+	mesh.updateMatrix();
+	// buildingGeometry.merge(mesh);
+	mesh.position.y -= 0.01;
+	// console.log(mesh);
+	$.scene.add(mesh);
+}
+
 function create3dObject(data) {
 	let coordinates = data.geometry.coordinates;
 	let properties = data.properties;
@@ -58,97 +76,16 @@ function create3dObject(data) {
 		//if data is a building property (if it's a building)
 		let building_levels = data.properties["building:levels"] || 1; //if building:levels property exists use it, otherwise use 1
 
-		$.buildingArray.push(generateBuildingV3(coordinates, building_levels));
+		$.buildingArray.push(generateBuildings(coordinates, building_levels));
 		// generateBuildingV2(coordinates, building_levels);
+	} else if (properties.highway && data.geometry.type != "Point") {
+		generateRoads(coordinates, properties);
+	} else if (properties.natural) {
+		$.waterArray.push(generateWater(coordinates, properties));
 	}
 }
 
-function generateBuildingV1(coordinates, height = 1) {
-	//each geojson "object" has multiple arrays of coordinates.
-	//the first array is the main (outer) building shape
-	//the second & third & .. are the "holes" in the building
-
-	//single building with multiple polygons
-	let buildingGeometry = new THREE.BufferGeometry();
-	// arrayOfPolygons["group" + counter] = new THREE.Group();
-
-	//for each of the coordinate groups
-	coordinates.forEach((polygon, index) => {
-		//generate shape
-		let shape = new THREE.Shape(); //only a single polygon?
-		polygon.forEach((coordinates, index) => {
-			let coords = normalizeCoordinates(coordinates, $.config.citycenter);
-			if (index == 0) {
-				shape.moveTo(coords[0], coords[1]);
-			} else {
-				shape.lineTo(coords[0], coords[1]);
-			}
-			// console.log(coordinates);
-			// shape.moveTo(coordinates[0], coordinates[1]);
-		});
-
-		// let height = 1;
-		let geometry = new THREE.ExtrudeBufferGeometry(shape, {
-			curveSegments: 1,
-			depth: 0.05 * height,
-			bevelEnabled: false,
-		});
-
-		geometry.rotateX(Math.PI / 2);
-		geometry.rotateZ(Math.PI);
-
-		// const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-		const material = new THREE.MeshPhongMaterial({
-			color: $.config.color_buildings,
-		});
-		const mesh = new THREE.Mesh(geometry, material);
-
-		mesh.updateMatrix();
-		// buildingGeometry.merge(mesh);
-
-		// console.log(mesh);
-		$.scene.add(mesh);
-
-		// console.log("end of polygon");
-		// arrayOfPolygons["group" + counter].add(shape);
-		// element[0];
-	});
-}
-
-function generateBuildingV2(coordinates, height = 1) {
-	//each geojson "object" has multiple arrays of coordinates.
-	//the first array is the main (outer) building shape
-	//the second & third & .. are the "holes" in the building
-	let buildingShape, buildingGeometry; //main building
-	// let buildingHoles = []; //holes to punch out shape
-
-	coordinates.forEach((points, index) => {
-		//for each building do:
-		if (index == 0) {
-			//create main building shape
-			buildingShape = generateShape(points);
-		} else {
-			//create shape of holes in building
-			buildingShape.holes.push(generateShape(points));
-			// buildingHoles.push(generateShape(points));
-		}
-	});
-
-	buildingGeometry = generateGeometry(buildingShape, height);
-
-	const material = new THREE.MeshPhongMaterial({
-		color: $.config.color_buildings,
-	});
-	const mesh = new THREE.Mesh(buildingGeometry, material);
-
-	mesh.updateMatrix();
-	// buildingGeometry.merge(mesh);
-
-	// console.log(mesh);
-	$.scene.add(mesh);
-}
-
-function generateBuildingV3(coordinates, height = 1) {
+function generateBuildings(coordinates, height = 1) {
 	//each geojson "object" has multiple arrays of coordinates.
 	//the first array is the main (outer) building shape
 	//the second & third & .. are the "holes" in the building
@@ -171,8 +108,61 @@ function generateBuildingV3(coordinates, height = 1) {
 	return buildingGeometry;
 }
 
-function generateRoads(coordinates) {}
+function generateRoads(coordinates, properties) {
+	// console.log(1);
+	let points = [];
 
+	coordinates.forEach((coordinates) => {
+		let coords = normalizeCoordinates(coordinates, $.config.citycenter);
+		points.push(new THREE.Vector3(coords[0], 0.002, coords[1]));
+		// console.log(points);
+		// if (element[0][1]) return;
+		// if (!element[0] || !element[1]) return;
+		// else {
+		// }
+		// console.log(element);
+	});
+
+	if (points.length > 1) {
+		let geometry = new THREE.BufferGeometry().setFromPoints(points);
+		geometry.rotateZ(Math.PI);
+		// return geometry;
+		let line = new THREE.Line(geometry, $.material_road);
+		// line.ExtrudeBufferGeometry();
+		$.scene.add(line);
+		// console.log("end of road");
+		//V2
+		// let geometry = new LineGeometry();
+		// geometry.setPositions(points);
+		// line = new Line2(geometry, $.material_road2);
+		// scene.add(line);
+	}
+}
+
+function generateWater(coordinates, properties) {
+	//each geojson "object" has multiple arrays of coordinates.
+	//the first array is the main (outer) building shape
+	//the second & third & .. are the "holes" in the building
+	let waterShape, waterGeometry; //main building
+	// let buildingHoles = []; //holes to punch out shape
+
+	coordinates.forEach((points, index) => {
+		//for each building do:
+		if (index == 0) {
+			//create main building shape
+			waterShape = generateShape(points);
+		} else {
+			//create shape of holes in building
+			waterShape.holes.push(generateShape(points));
+			// buildingHoles.push(generateShape(points));
+		}
+	});
+
+	waterGeometry = generateGeometry(waterShape, 0.001);
+	return waterGeometry;
+}
+
+//GENERICS
 function generateShape(polygon) {
 	let shape = new THREE.Shape(); //only a single polygon?
 

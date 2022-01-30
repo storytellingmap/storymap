@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
 export const GLOBAL = {
 	scene: null,
@@ -7,6 +8,14 @@ export const GLOBAL = {
 	controls: null,
 	stats: null,
 	buildingArray: [],
+	roadArray: [],
+	waterArray: [],
+	scrollpercentage: 0,
+	line: null,
+	lineArray: [],
+	lineClickCounter: 0,
+	mouseposition: new THREE.Vector2(),
+	raycaster: new THREE.Raycaster(),
 	config: {
 		debug: true,
 		data: "./data/bruges-small.geojson",
@@ -22,5 +31,19 @@ export const GLOBAL = {
 		color: 0x00ff00,
 		transparent: true,
 		opacity: 0.25,
+	}),
+	material_road: new THREE.LineBasicMaterial({
+		color: 0x00ff00,
+		transparent: false,
+		linewidth: 10,
+		opacity: 1,
+	}),
+	material_road2: new LineMaterial({
+		color: 0xffffff,
+		linewidth: 5, // in world units with size attenuation, pixels otherwise
+		vertexColors: true,
+		//resolution:  // to be set by renderer, eventually
+		dashed: false,
+		alphaToCoverage: false,
 	}),
 };
