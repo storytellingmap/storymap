@@ -21,7 +21,7 @@ function setup() {
 function start() {
 	initialize(); //create threejs scene, populate global variables
 	animate();
-	// generateCity();
+	generateCity();
 	animatePath(); //animates the created path from setup
 }
 

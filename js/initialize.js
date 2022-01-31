@@ -2,6 +2,7 @@ import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
 import { MapControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
+import { Vector3 } from "three";
 
 /*
 create threejs scene, populate global variables
@@ -23,10 +24,11 @@ function initialize() {
 	$.camera = new THREE.PerspectiveCamera(
 		25,
 		window.innerWidth / window.innerHeight,
-		1,
-		100,
+		0.1,
+		2000,
 	);
-	$.camera.position.set(8, 4, 1);
+	// $.camera.position.set(8, 2, 1);
+	$.camera.position.set($.cameraPos.x, $.cameraPos.y, $.cameraPos.z);
 
 	//RAYCASTING
 	// const geometryHelper = new THREE.ConeGeometry(20, 100, 3);

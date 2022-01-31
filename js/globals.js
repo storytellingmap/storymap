@@ -4,18 +4,23 @@ import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 export const GLOBAL = {
 	scene: null,
 	camera: null,
+	cameraLookAtPos: new THREE.Vector3(0, 0, 0),
+	cameraPos: new THREE.Vector3(8, 2, 1),
 	renderer: null,
 	controls: null,
 	stats: null,
 	buildingArray: [],
 	roadArray: [],
 	waterArray: [],
+
 	scrollpercentage: 0,
 	line: null,
 	lineArray: [],
+	lineArrayBackup: [],
 	lineClickCounter: 0,
 	mouseposition: new THREE.Vector2(),
 	raycaster: new THREE.Raycaster(),
+
 	config: {
 		debug: true,
 		data: "./data/bruges-small.geojson",
