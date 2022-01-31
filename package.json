@@ -1,17 +1,30 @@
 {
-  "name": "storymap",
-  "version": "0.0.0",
-  "scripts": {
-    "dev": "vite",
-	"host": "vite --host",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^2.7.2"
-  },
-  "dependencies": {
-    "geolib": "^3.3.3",
-    "three": "^0.136.0"
-  }
+	"name": "storymaps",
+	"version": "1.0.0",
+	"description": "a 3D map of a city with an animated path and camera",
+	"main": "index.js",
+	"directories": {
+		"example": "examples"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/elfensky/storymap.git"
+	},
+	"keywords": [
+		"threejs",
+		"javascript",
+		"3D",
+		"WebGL",
+		"three.js",
+		"three-js"
+	],
+	"author": "Andrei Lavrenov <andrei@lavrenov.io> (https://lavrenov.io/)",
+	"license": "UNLICENSED",
+	"bugs": {
+		"url": "https://github.com/elfensky/storymap/issues"
+	},
+	"homepage": "https://github.com/elfensky/storymap#readme"
 }
