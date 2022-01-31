@@ -26,5 +26,9 @@
 	"bugs": {
 		"url": "https://github.com/elfensky/storymap/issues"
 	},
-	"homepage": "https://github.com/elfensky/storymap#readme"
+	"homepage": "https://github.com/elfensky/storymap#readme",
+	"dependencies": {
+		"geolib": "^3.3.3",
+		"three": "^0.137.5"
+	}
 }
