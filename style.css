@@ -22,8 +22,9 @@ body {
 
 canvas {
 	position: fixed;
+	width: 50vw;
 	top: 0;
-	left: 0;
+	right: 0;
 	pointer-events: none;
 }
 

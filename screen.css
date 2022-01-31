@@ -1,0 +1,519 @@
+/*------------------------------------*\
+  #SETTINGS
+\*------------------------------------*/
+/*------------------------------------*\
+  #TOOLS 
+\*------------------------------------*/
+/*------------------------------------*\
+  #GENERIC
+\*------------------------------------*/
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default padding */
+ul[class],
+ol[class] {
+  padding: 0;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+ul[class],
+ol[class],
+figure,
+blockquote,
+dl,
+dd,
+article {
+  margin: 0;
+}
+
+/* Set core body defaults */
+body {
+  min-height: 100vh;
+  scroll-behavior: smooth;
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+}
+
+/* Remove list styles on ul, ol elements with a class attribute */
+ul[class],
+ol[class] {
+  list-style: none;
+}
+
+/* A elements that don't have a class get default styles */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+}
+
+/* Make images easier to work with */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Natural flow and rhythm in articles by default */
+article > * + * {
+  margin-top: 0;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Blur images when they have no alt attribute */
+img:not([alt]) {
+  filter: blur(10px);
+}
+
+/* Remove all animations and transitions for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+/*------------------------------------*\
+  #ELEMENTS
+\*------------------------------------*/
+body {
+  font-size: 16px;
+  font-family: "Helvetica Neue", Roboto;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/*------------------------------------*\
+  #OBJECTS
+\*------------------------------------*/
+.o-section {
+  display: flex;
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.o-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  width: 50%;
+  height: inherit;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+}
+.o-grid--left {
+  padding-left: 6.25vw;
+}
+.o-grid__title {
+  grid-area: 3/1/5/9;
+  font-weight: 600;
+  font-size: 7.25vw;
+}
+.o-grid__title--align {
+  position: relative;
+  left: -7px;
+  top: -5.25vh;
+}
+.o-grid__sub-title {
+  grid-area: 5/1/6/5;
+  font-weight: 500;
+  font-size: 1.8125vw;
+}
+.o-grid__info {
+  grid-area: 6/1/9/5;
+  font-size: 1vw;
+}
+.o-grid__links {
+  grid-area: 7/1/8/5;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  font-size: 1.125vw;
+}
+.o-grid__links--single {
+  justify-content: flex-end;
+}
+.o-grid__social {
+  grid-area: 5/7/9/8;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.6vw;
+}
+.o-grid__social a {
+  margin-bottom: 1rem;
+  color: white;
+}
+
+/*------------------------------------*\
+  #COMPONENTS
+\*------------------------------------*/
+.navbar {
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  height: 6.25vh;
+}
+.navbar__left {
+  width: 50vw;
+}
+.navbar__right {
+  flex-grow: 1;
+  text-align: left;
+  display: flex;
+  align-items: end;
+}
+.navbar__list {
+  display: flex;
+}
+.navbar__item {
+  margin-right: 1.25vw;
+  font-size: 1.25vw;
+}
+
+.c-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.c-header__video {
+  position: absolute;
+  z-index: -2;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.c-header__grid {
+  background-color: rgba(236, 236, 236, 0.98);
+  background-color: rgba(0, 0, 0, 0.25);
+  color: white;
+}
+.c-header__links a {
+  color: white;
+}
+
+#instagram:hover {
+  display: inline-table;
+  background: -webkit-linear-gradient(#eee, #333);
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#facebook:hover {
+  color: #3b5998;
+}
+
+#twitter:hover {
+  color: #1da1f2;
+}
+
+#whatsapp:hover {
+  color: #25D366;
+}
+
+#viber:hover {
+  color: #7360f2;
+}
+
+.c-aboutme__image {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.c-aboutme__image img {
+  height: 90%;
+}
+.c-aboutme__details {
+  grid-area: 7/1/8/7;
+}
+
+.c-blog {
+  background-image: url("../img/belgium.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.c-blog__grid {
+  padding-top: 35vh;
+  display: flex;
+  flex-direction: column;
+}
+.c-blog__image {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.c-blog__image img {
+  height: 90%;
+}
+.c-blog__post {
+  width: 25vw;
+  border-bottom: 1px solid black;
+  margin-bottom: 2vw;
+}
+.c-blog__post__title {
+  font-weight: 500;
+  font-size: 1.8125vw;
+  margin-bottom: 0.5vw;
+}
+.c-blog__post__info {
+  font-weight: 400;
+  font-size: 1vw;
+  margin-bottom: 0.5vw;
+}
+.c-blog__post__text {
+  font-weight: 400;
+  font-size: 1vw;
+  margin-bottom: 0.5vw;
+}
+.c-blog__post__link {
+  font-weight: 400;
+  font-size: 1.125vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-bottom: 1.125vw;
+}
+
+.c-tours {
+  overflow: visible;
+  height: auto;
+}
+.c-tours__grid {
+  height: calc(100vw/2);
+  z-index: -3;
+}
+.c-tours__grid--fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+.c-tours__container {
+  padding-top: 35vh;
+}
+.c-tours__container--fixed {
+  margin-left: 50%;
+}
+.c-tours__image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100vh;
+  z-index: -1;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  animation: image_fade_out 1s;
+  opacity: 0;
+}
+.c-tours__post {
+  width: 25vw;
+  margin-bottom: 2vw;
+  display: flex;
+  flex-direction: row;
+}
+.c-tours__post:hover .c-tours__post__link {
+  transition: padding-bottom 0.5s ease;
+  padding-bottom: 2.25vw;
+}
+.c-tours__post__left {
+  width: 15vw;
+}
+.c-tours__post__right {
+  width: 25vw;
+}
+.c-tours__post__title {
+  font-weight: 500;
+  font-size: 1.8125vw;
+  margin-bottom: 0.5vw;
+}
+.c-tours__post__info {
+  font-weight: 400;
+  font-size: 1vw;
+  margin-bottom: 0.5vw;
+}
+.c-tours__post__text {
+  font-weight: 400;
+  font-size: 1vw;
+  margin-bottom: 0.5vw;
+}
+.c-tours__post__link {
+  font-weight: 400;
+  font-size: 1.125vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  transition: padding-bottom 0.5s ease;
+  padding-bottom: 1.125vw;
+  border-bottom: 1px solid black;
+}
+.c-tours__post__link a {
+  margin-left: 1.8125vw;
+}
+
+@keyframes image_fade_in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes image_fade_out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+#abbeyvillers ~ #image {
+  opacity: 0;
+  transition: 2s ease;
+  background-image: url("");
+}
+
+#abbeyvillers:hover ~ #image {
+  opacity: 1;
+  transition: 2s ease;
+  background-image: url("../img/tours/abbeyvillers3.jpg");
+}
+
+#bruges ~ #image {
+  opacity: 0;
+  transition: 1s ease;
+  background-image: url("#");
+}
+
+#bruges:hover ~ #image {
+  animation: image_fade_in 1s;
+  background-image: url("../img/tours/bruges.jpg");
+}
+
+#ghent:hover ~ #image {
+  background-image: url("../img/tours/ghent.jpg");
+}
+
+#leuven:hover ~ #image {
+  background-image: url("../img/tours/leuven.jpg");
+}
+
+#damme:hover ~ #image {
+  background-image: url("../img/tours/damme.jpg");
+}
+
+#brussels:hover ~ #image {
+  background-image: url("../img/tours/brussels.jpg");
+}
+
+#antwerp:hover ~ #image {
+  background-image: url("../img/tours/antwerp.jpg");
+}
+
+#hoegaarden:hover ~ #image {
+  background-image: url("../img/tours/hoegaarden.jpg");
+}
+
+.c-contact__background {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: -1;
+}
+.c-contact__overlay {
+  height: 100vh;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: -1;
+  width: 100vw;
+}
+.c-contact__map {
+  height: 100vh;
+  z-index: -2;
+}
+.c-contact__left {
+  color: white;
+}
+.c-contact__right {
+  background-color: rgba(0, 0, 0, 0);
+  padding: 0;
+}
+.c-contact__form {
+  height: 75%;
+  width: 50%;
+  margin: auto 0;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 50%;
+  width: 50%;
+  margin: 50vh 0 0 0;
+}
+.c-contact__controls {
+  width: 100%;
+  height: 100%;
+}
+.c-contact__controls textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding: 1rem 1rem 1rem 0;
+}
+
+@media (min-aspect-ratio: 16/9) {
+  .c-header__video {
+    width: 100vw;
+    height: auto;
+  }
+}
+@media (max-aspect-ratio: 16/9) {
+  .c-header__video {
+    width: auto;
+    height: 100vh;
+  }
+}
+/*------------------------------------*\
+  #UTILITIES
+\*------------------------------------*/
+
+/*# sourceMappingURL=screen.css.map */

@@ -150,11 +150,11 @@ function playScrollAnimations() {
 //add an animation that moves the cube through first 40 percent of scroll
 //DRAW PATH ANIMATION
 animationScripts.push({
-	start: 1,
+	start: 15,
 	end: 99,
 	func: () => {
 		let x = 1 / LINEPOINTCOUNT;
-		let linePercent = scalePercent(1, 99) / x;
+		let linePercent = scalePercent(15, 99) / x;
 		let lineInt = parseInt(linePercent);
 		let lineFloat = linePercent - lineInt;
 		// console.log(lineFloat);
@@ -193,6 +193,10 @@ function updateLine(index, percentage) {
 	$.lineArray[index * 3 - 2] = $.cameraLookAtPos.y;
 	$.lineArray[index * 3 - 1] = $.cameraLookAtPos.z;
 
+	$.lineArray[(index - 1) * 3 - 3] = $.lineArrayBackup[index * 3 - 3];
+	$.lineArray[(index - 1) * 3 - 2] = $.lineArrayBackup[index * 3 - 2];
+	$.lineArray[(index - 1) * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
+
 	$.line.geometry.attributes.position.needsUpdate = true;
 
 	// $.lineArray = $.lineArrayBackup;
@@ -209,19 +213,13 @@ function updateLine(index, percentage) {
 	// 	$.lineArray[index * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
 	// }
 
-	// $.lineArray[(index - 1) * 3 - 3] =
-	// 	$.lineArrayBackup[(index - 1) * 3 - 3];
-	// $.lineArray[(index - 1) * 3 - 2] =
-	// 	$.lineArrayBackup[(index - 1) * 3 - 2];
-	// $.lineArray[(index - 1) * 3 - 1] =
-	// 	$.lineArrayBackup[(index - 1) * 3 - 1];
+	// $.lineArray[(index - 1) * 3 - 3] = $.lineArrayBackup[(index - 1) * 3 - 3];
+	// $.lineArray[(index - 1) * 3 - 2] = $.lineArrayBackup[(index - 1) * 3 - 2];
+	// $.lineArray[(index - 1) * 3 - 1] = $.lineArrayBackup[(index - 1) * 3 - 1];
 
-	// $.lineArray[(index + 1) * 3 - 3] =
-	// 	$.lineArrayBackup[(index + 1) * 3 - 3];
-	// $.lineArray[(index + 1) * 3 - 2] =
-	// 	$.lineArrayBackup[(index + 1) * 3 - 2];
-	// $.lineArray[(index + 1) * 3 - 1] =
-	// 	$.lineArrayBackup[(index + 1) * 3 - 1];
+	// $.lineArray[(index + 1) * 3 - 3] = $.lineArrayBackup[(index + 1) * 3 - 3];
+	// $.lineArray[(index + 1) * 3 - 2] = $.lineArrayBackup[(index + 1) * 3 - 2];
+	// $.lineArray[(index + 1) * 3 - 1] = $.lineArrayBackup[(index + 1) * 3 - 1];
 }
 
 // Used to fit the lerps to start and end at specific scrolling percentages

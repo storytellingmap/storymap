@@ -6,6 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Vite App</title>
 		<link rel="stylesheet" href="./style.css" />
+		<link rel="stylesheet" href="./screen.css" />
+		<link rel="stylesheet" href="./override.css" />
 	</head>
 	<body>
 		<!-- <div class="shortcuts">
@@ -21,34 +23,112 @@
 			</ul>
 		</div> -->
 		<span id="scrollProgress"></span>
-		<main>
-			<h1>Animate on Scroll</h1>
-			<section>
-				<h2>Begin scrolling to see things change</h2>
-			</section>
-			<section>
-				<h2>Changing Objects Position</h2>
-				<p>The cubes position is now changing</p>
-			</section>
+		<!-- HEADER  -->
+		<header class="c-header o-section scrollify">
+			<!-- GRID  -->
+			<div class="o-grid c-header__grid">
+				<h1 class="o-grid__title">
+					<span class="o-grid__title--align">Bruges</span>
+				</h1>
+				<h2 class="o-grid__sub-title">
+					Discover all the nooks <br />
+					and crannier of this <br />
+					beautiful old city.
+					<!-- Привет! Я,<br />
+					Татьяна Лавренова.<br />
+					Ваш гид по Бельгии! -->
+				</h2>
+				<div class="o-grid__info">
+					From the picturesque city center to the grafitti walls, I
+					will show you Bruges like you've never seen it before
+				</div>
+				<div class="o-grid__links c-header__links">
+					<a href="javascript:smooth('aboutme');">Learn more >></a>
+					<a href="javascript:smooth('tours');"
+						>Create reservation >></a
+					>
+				</div>
+				<div class="o-grid__social">
+					<a id="instagram" href="#"
+						><i class="fab fa-instagram"></i
+					></a>
+					<a id="facebook" href="#"
+						><i class="fab fa-facebook-f"></i
+					></a>
+					<a id="twitter" href="#"><i class="fab fa-twitter"></i></a>
+					<a id="whatsapp" href="#"
+						><i class="fab fa-whatsapp"></i
+					></a>
+					<a id="viber" href="#"><i class="fab fa-viber"></i></a>
+				</div>
+			</div>
+		</header>
 
-			<section>
-				<h2>Changing Objects Rotation</h2>
-				<p>The cubes rotation is now changing</p>
-			</section>
+		<article id="aboutme" class="c-aboutme o-section scrollify">
+			<!-- ABOUT ME GRID  -->
+			<div class="c-aboutme__grid o-grid o-grid--left">
+				<h1 class="o-grid__title">
+					<span class="o-grid__title--align">POI1</span>
+				</h1>
+				<h2 class="o-grid__sub-title">
+					Short Description about it/name
+				</h2>
+				<div class="o-grid__info">Long description about it</div>
+			</div>
+		</article>
 
-			<section>
-				<h2>Changing Camera Position</h2>
-				<p>The camera position is now changing</p>
-			</section>
+		<article id="aboutme" class="c-aboutme o-section scrollify">
+			<!-- ABOUT ME GRID  -->
+			<div class="c-aboutme__grid o-grid o-grid--left">
+				<h1 class="o-grid__title">
+					<span class="o-grid__title--align">POI2</span>
+				</h1>
+				<h2 class="o-grid__sub-title">
+					Short Description about it/name
+				</h2>
+				<div class="o-grid__info">Long description about it</div>
+			</div>
+		</article>
 
-			<section>
-				<h2>You are at the bottom</h2>
-				<p>The cube will now be auto rotating</p>
-				<p>
-					Now you can scroll back to the top to reverse the animation
-				</p>
-			</section>
-		</main>
+		<article id="aboutme" class="c-aboutme o-section scrollify">
+			<!-- ABOUT ME GRID  -->
+			<div class="c-aboutme__grid o-grid o-grid--left">
+				<h1 class="o-grid__title">
+					<span class="o-grid__title--align">POI3</span>
+				</h1>
+				<h2 class="o-grid__sub-title">
+					Short Description about it/name
+				</h2>
+				<div class="o-grid__info">Long description about it</div>
+			</div>
+		</article>
+
+		<article id="aboutme" class="c-aboutme o-section scrollify">
+			<!-- ABOUT ME GRID  -->
+			<div class="c-aboutme__grid o-grid o-grid--left">
+				<h1 class="o-grid__title">
+					<span class="o-grid__title--align">POI4</span>
+				</h1>
+				<h2 class="o-grid__sub-title">
+					Short Description about it/name
+				</h2>
+				<div class="o-grid__info">Long description about it</div>
+			</div>
+		</article>
+
+		<article id="aboutme" class="c-aboutme o-section scrollify">
+			<!-- ABOUT ME GRID  -->
+			<div class="c-aboutme__grid o-grid o-grid--left">
+				<h1 class="o-grid__title">
+					<span class="o-grid__title--align">POI5</span>
+				</h1>
+				<h2 class="o-grid__sub-title">
+					Short Description about it/name
+				</h2>
+				<div class="o-grid__info">Long description about it</div>
+			</div>
+		</article>
+
 		<div id="container"></div>
 
 		<!-- <canvas id="bg"></canvas> -->

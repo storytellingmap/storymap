@@ -7,12 +7,21 @@ import { Vector3 } from "three";
 /*
 create threejs scene, populate global variables
 */
+// const container;
 function initialize() {
 	//initializes threeJS scene.
 	//variables:
 	// color_buildings = config.color_buildings;
 	//background_color is a hexadecimal value of the threejs scene's background
-
+	let list = document.getElementsByClassName("c-header__grid");
+	// console.log(x);
+	for (var i = 0; i < list.length; i++) {
+		// console.log( ); //second console output
+		list[i].style.width = window.innerWidth / 2 + "px";
+	}
+	// x.forEach((el) => {
+	// 	el.style.width = "100";
+	// });
 	//local variables
 	const container = document.getElementById($.config.container);
 
@@ -23,7 +32,7 @@ function initialize() {
 	//initialize threejs camera
 	$.camera = new THREE.PerspectiveCamera(
 		25,
-		window.innerWidth / window.innerHeight,
+		window.innerWidth / 2 / window.innerHeight,
 		0.1,
 		2000,
 	);
@@ -59,7 +68,7 @@ function initialize() {
 	//initialize renderer
 	$.renderer = new THREE.WebGLRenderer({ antialias: true });
 	$.renderer.setPixelRatio(window.devicePixelRatio);
-	$.renderer.setSize(window.innerWidth, window.innerHeight);
+	$.renderer.setSize(window.innerWidth / 2, window.innerHeight);
 
 	container.appendChild($.renderer.domElement);
 
@@ -89,6 +98,7 @@ function initialize() {
 		//FPS COUNTER
 		$.stats = new Stats();
 		container.appendChild($.stats.dom);
+		// console.log();
 
 		//initialize controls
 		$.controls = new MapControls($.camera, $.renderer.domElement);
@@ -101,9 +111,9 @@ function initialize() {
 }
 
 function resize() {
-	$.camera.aspect = window.innerWidth / window.innerHeight;
+	$.camera.aspect = window.innerWidth / 2 / window.innerHeight;
 	$.camera.updateProjectionMatrix();
-	$.renderer.setSize(window.innerWidth, window.innerHeight);
+	$.renderer.setSize(window.innerWidth / 2, window.innerHeight);
 }
 
 function animate() {
