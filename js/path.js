@@ -2,6 +2,7 @@ import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
 import * as GEOLIB from "geolib";
 
+let ground;
 //ground plane against which you'll raycast.
 function createGround(size = 100) {
 	const shape = new THREE.Shape();
@@ -18,7 +19,7 @@ function createGround(size = 100) {
 	geometry.translate(half, 0.0001, -half); //why is threejs so retarded. why is it xzy
 
 	// const mesh = new THREE.Mesh(geometry, material);
-	const ground = new THREE.Mesh(geometry, $.material_ground);
+	ground = new THREE.Mesh(geometry, $.material_ground);
 	ground.name = "GROUND";
 	// mesh.translateY(-51.0442347);
 	// mesh.setRotationFromAxisAngle(-90);
@@ -57,12 +58,13 @@ function initializeEventListeners() {
 		function onKeyUp(event) {
 			if (event.key == "s") {
 				console.log("start drawing path");
-				// addRaycaster();
 				window.addEventListener("click", addRaycaster, false);
+				window.addEventListener("mousemove", onMouseMove, false);
 			}
 			if (event.key == "f") {
 				console.log("finish and save path.");
 				window.removeEventListener("click", addRaycaster, false);
+				// window.removeEventListener("mousemove", onMouseMove, false);
 				savePath();
 			}
 		}
@@ -157,6 +159,46 @@ function savePath() {
 		a.download = fileName;
 		a.click();
 	}
+}
+
+function onMouseMove(event) {
+	castRay(event);
+	if ($.lineClickCounter !== 0) {
+		updateLine($.mouseposition);
+	}
+}
+
+function castRay() {
+	const raycaster = new THREE.Raycaster(); //raycaster
+	const mousePos = new THREE.Vector2(); //mouse pos
+	const mouseMove = new THREE.Vector2(); //last mouse movement position
+
+	mousePos.x = (event.clientX / window.innerWidth) * 2 - 1;
+	mousePos.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	// console.log(mousePos);
+
+	raycaster.setFromCamera(mousePos, $.camera);
+	let found = raycaster.intersectObjects($.scene.children);
+	// console.log(found.length);
+	if (found.length > 0) {
+		// console.log(1);
+		found.forEach((ray) => {
+			// console.log(ray);
+			if (ray.object.name == "GROUND") {
+				// console.log(ray.point);
+				// placeBox(ray.point);
+				// createLine(ray.point);
+				$.mouseposition = ray.point;
+			}
+		});
+	}
+}
+
+function updateLine(mouse) {
+	$.lineArray[$.lineClickCounter * 3 - 3] = mouse.x;
+	$.lineArray[$.lineClickCounter * 3 - 2] = mouse.y;
+	$.lineArray[$.lineClickCounter * 3 - 1] = mouse.z;
+	$.line.geometry.attributes.position.needsUpdate = true;
 }
 
 //main function

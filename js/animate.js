@@ -17,7 +17,7 @@ async function animatePath() {
 		$.lineArray[index * 3 + 2] = element[2];
 	});
 
-	drawSpline();
+	// drawSpline();
 	// drawLine2();
 	initializeEventListeners();
 	animate();
@@ -57,56 +57,7 @@ async function drawSpline() {
 	$.scene.add(curveObject);
 }
 
-async function drawLine2() {
-	//global
-	const positions = [];
-	const data = await loadPath();
-
-	//create line2
-	const spline = new THREE.CatmullRomCurve3([
-		new THREE.Vector3(0, 0, 0),
-		new THREE.Vector3(1, 0, 1),
-		new THREE.Vector3(2, 2, 2),
-	]);
-
-	const points = [
-		new THREE.Vector3(0, 0, 0),
-		new THREE.Vector3(1, 0, 1),
-		new THREE.Vector3(2, 2, 2),
-	];
-
-	const divisions = Math.round(12 * points.length);
-	const point = new THREE.Vector3();
-	const color = new THREE.Color();
-
-	for (let i = 0, l = divisions; i < l; i++) {
-		const t = i / l;
-
-		spline.getPoint(t, point);
-		positions.push(point.x, point.y, point.z);
-	}
-
-	const geometry = new LineGeometry();
-	geometry.setPositions(positions);
-
-	let matLine = new LineMaterial({
-		color: 0xffffff,
-		linewidth: 5, // in world units with size attenuation, pixels otherwise
-		// vertexColors: true,
-
-		//resolution:  // to be set by renderer, eventually
-		dashed: true,
-		dashSize: 3.6,
-		gapSize: 1e10,
-		alphaToCoverage: true,
-	});
-
-	$.line = new Line2(geometry, matLine);
-	$.line.computeLineDistances();
-	$.line.scale.set(1, 1, 1);
-	$.scene.add($.line);
-}
-
+//ANIMATED PATH
 async function drawLine() {}
 
 function initializeEventListeners() {
@@ -150,9 +101,11 @@ function playScrollAnimations() {
 
 //add an animation that moves the cube through first 40 percent of scroll
 animationScripts.push({
-	start: 5,
-	end: 40,
-	func: () => {},
+	start: 1,
+	end: 6,
+	func: () => {
+		console.log(scalePercent(1, 6));
+	},
 });
 
 function lerp(x, y, a) {

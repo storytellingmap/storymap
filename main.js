@@ -13,5 +13,5 @@ storymaps.global.config = {
 	opacity_ground: 0.25,
 };
 
-// storymaps.setup();
-storymaps.start();
+storymaps.setup();
+// storymaps.start();
