@@ -1,43 +1,68 @@
 import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
-import * as GEOLIB from "geolib";
+// import * as GEOLIB from "geolib";
 import { Line2 } from "three/examples/jsm/lines/Line2.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
 
 const animationScripts = [];
-// let drawRange = 0;
 
 async function animatePath() {
-	// let data = await loadPath();
+	let data = await loadPath();
 
-	// // $.lineArray = new Float32Array(data.length * 3);
+	$.lineArray = new Float32Array(data.length * 3);
+	data.forEach((element, index) => {
+		$.lineArray[index * 3 + 0] = element[0];
+		$.lineArray[index * 3 + 1] = element[1];
+		$.lineArray[index * 3 + 2] = element[2];
+	});
 
-	// // // let drawRange = 0;
-	// data.forEach((element, index) => {
-	// 	$.lineArray[index * 3 + 0] = element[0];
-	// 	$.lineArray[index * 3 + 1] = element[1];
-	// 	$.lineArray[index * 3 + 2] = element[2];
-	// 	// drawRange += 1;
-	// });
-
-	drawPath();
-
+	drawSpline();
+	// drawLine2();
 	initializeEventListeners();
-	// animate();
+	animate();
 }
 
 async function loadPath() {
-	return await fetch($.config.path).then((response) => {
+	return await fetch("./data/path.json").then((response) => {
 		return response.json().then((data) => {
-			return data;
+			let v3array = [];
+			data.forEach((el) => {
+				v3array.push(new THREE.Vector3(el[0], el[1], el[2]));
+			});
+			return v3array;
 		});
 	});
 }
 
-function drawPath() {
-	const positions = [];
+//CAMERA PATH
+async function drawSpline() {
+	let data = await loadPath();
 
+	const curve = new THREE.CatmullRomCurve3([data[0], data[1], data[2]]);
+	const points = curve.getPoints(50);
+
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	// geometry.positions.push(data[3]);
+	const material = new THREE.LineDashedMaterial({
+		color: 0xffffff,
+		linewidth: 1,
+		scale: 1,
+		dashSize: 1, // to be updated in the render loop
+		gapSize: 1e10, // a big number, so only one dash is rendered
+	});
+
+	const curveObject = new THREE.Line(geometry, material);
+
+	$.scene.add(curveObject);
+}
+
+async function drawLine2() {
+	//global
+	const positions = [];
+	const data = await loadPath();
+
+	//create line2
 	const spline = new THREE.CatmullRomCurve3([
 		new THREE.Vector3(0, 0, 0),
 		new THREE.Vector3(1, 0, 1),
@@ -76,11 +101,13 @@ function drawPath() {
 		alphaToCoverage: true,
 	});
 
-	let line = new Line2(geometry, matLine);
-	line.computeLineDistances();
-	line.scale.set(1, 1, 1);
-	$.scene.add(line);
+	$.line = new Line2(geometry, matLine);
+	$.line.computeLineDistances();
+	$.line.scale.set(1, 1, 1);
+	$.scene.add($.line);
 }
+
+async function drawLine() {}
 
 function initializeEventListeners() {
 	scrollPercentage();
@@ -125,10 +152,7 @@ function playScrollAnimations() {
 animationScripts.push({
 	start: 5,
 	end: 40,
-	func: () => {
-		// fraction = (fraction + 0.001) % 1;
-		// $.line.material.dashSize = fraction * lineLength;
-	},
+	func: () => {},
 });
 
 function lerp(x, y, a) {

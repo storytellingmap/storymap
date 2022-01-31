@@ -6,59 +6,67 @@ const animationScripts = [];
 
 async function animatePath() {
 	let data = await loadPath();
-	$.lineArray = new Float32Array(600 * 3);
 
-	let drawRange = 0;
-	// console.log(data);
-	data.forEach((element, index) => {
-		$.lineArray[index * 3 + 0] = element[0];
-		$.lineArray[index * 3 + 1] = element[1];
-		$.lineArray[index * 3 + 2] = element[2];
-		drawRange += 1;
-	});
+	console.log($.lineArray);
+	drawPath(data);
 
-	drawPath(drawRange);
-
-	initializeEventListeners();
-	animate();
+	// initializeEventListeners();
+	// animate();
 }
 
-async function loadPath() {
-	return await fetch($.config.path).then((response) => {
-		return response.json().then((data) => {
-			return data;
-		});
+function drawPath(data) {
+	let parent, tubeGeometry, mesh;
+	const spline = new THREE.Curve();
+	const spline = new THREE.CatmullRomCurve3($.lineArray);
+
+	const material = new THREE.MeshLambertMaterial({ color: 0xff00ff });
+
+	const wireframeMaterial = new THREE.MeshBasicMaterial({
+		color: 0x000000,
+		opacity: 0.3,
+		wireframe: true,
+		transparent: true,
 	});
-}
 
-function drawPath(drawRange) {
-	let geometry = new THREE.BufferGeometry();
+	const params = {
+		scale: 0.1,
+		extrusionSegments: 1,
+		tubularSegments: 1,
+		radiusSegments: 2,
+		closed: false,
+		animationView: false,
+		lookAhead: false,
+		cameraHelper: false,
+	};
 
-	geometry.setAttribute(
-		"position",
-		new THREE.BufferAttribute($.lineArray, 3),
+	const sampleClosedSpline = new THREE.CatmullRomCurve3([
+		new THREE.Vector3(0, -40, -40),
+		new THREE.Vector3(0, 40, -40),
+		new THREE.Vector3(0, 140, -40),
+		new THREE.Vector3(0, 40, 40),
+		// new THREE.Vector3(0, -40, 40),
+	]);
+
+	let pathBase = new THREE.CatmullRomCurve3($.lineArray);
+	tubeGeometry = new THREE.TubeGeometry(
+		sampleClosedSpline,
+		params.extrusionSegments,
+		params.tubularSegments,
+		params.radiusSegments,
+		params.closed,
 	);
 
-	// let material = new THREE.LineBasicMaterial({
-	// 	color: 0xff0000,
-	// 	linewidth: 5,
-	// 	transparent: true,
-	// 	opacity: 1,
-	// });
+	// addGeometry(tubeGeometry);
 
-	let material = new THREE.LineDashedMaterial({
-		color: 0xff0000,
-		vertexColors: 0x00ff00,
-		dashSize: 0.5,
-		gapSize: 0.5,
-	});
+	mesh = new THREE.Mesh(tubeGeometry, material);
+	const wireframe = new THREE.Mesh(tubeGeometry, wireframeMaterial);
+	mesh.add(wireframe);
+	mesh.scale.set(params.scale, params.scale, params.scale);
 
-	geometry.computeLineDistances();
+	parent = new THREE.Object3D();
+	parent.add(mesh);
 
-	$.line = new THREE.Line(geometry, material);
-	$.line.computeLineDistances();
-	// $.line.geometry.setDrawRange(0, drawRange); //HEWEIFHWGIHRIWFGJWDIFJWEIJ
-	$.scene.add($.line);
+	$.scene.add(parent);
 }
 
 function initializeEventListeners() {
@@ -97,6 +105,23 @@ function playScrollAnimations() {
 		if ($.scrollpercentage >= a.start && $.scrollpercentage < a.end) {
 			a.func();
 		}
+	});
+}
+
+async function loadPath() {
+	return await fetch($.config.path).then((response) => {
+		return response.json().then((data) => {
+			//populate $.linearray
+			$.lineArray = [];
+			data.forEach((vector) => {
+				// console.log(vector);
+				$.lineArray.push(
+					new THREE.Vector3(vector[0], vector[1], vector[2]),
+				);
+			});
+			//return data
+			return data;
+		});
 	});
 }
 
