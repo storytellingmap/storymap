@@ -1,5 +1,5 @@
 {
-	"name": "storymaps",
+	"name": "storymap",
 	"version": "1.0.0",
 	"description": "a 3D map of a city with an animated path and camera",
 	"main": "index.js",
