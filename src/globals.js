@@ -23,8 +23,8 @@ export const GLOBAL = {
 
 	config: {
 		debug: true,
-		data: "./sample/bruges.geojson",
-		path: "./sample/path.json",
+		data: "/node_modules/storymap/sample/bruges.geojson",
+		path: "/node_modules/storymap/sample/path.json",
 		container: "container",
 		citycenter: [3.227183, 51.209651],
 		color_background: 0x222222,

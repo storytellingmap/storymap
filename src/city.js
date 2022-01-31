@@ -4,9 +4,6 @@ import * as GEOLIB from "geolib";
 import { mergeBufferGeometries } from "three/examples/jsm/utils/BufferGeometryUtils";
 import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 
-import path from "./sample/path";
-console.log(path);
-
 async function loadGeoJsonAsync() {
 	return await fetch($.config.data).then((response) => {
 		return response.json().then((data) => {

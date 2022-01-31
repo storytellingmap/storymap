@@ -42,7 +42,7 @@ async function animatePath() {
 }
 
 async function loadPath() {
-	return await fetch("./data/path.json").then((response) => {
+	return await fetch($.config.path).then((response) => {
 		return response.json().then((data) => {
 			return data;
 		});

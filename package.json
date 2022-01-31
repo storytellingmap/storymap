@@ -16,10 +16,8 @@
 	"keywords": [
 		"threejs",
 		"javascript",
-		"3D",
 		"WebGL",
-		"three.js",
-		"three-js"
+		"3D"
 	],
 	"author": "Andrei Lavrenov <andrei@lavrenov.io> (https://lavrenov.io/)",
 	"license": "UNLICENSED",
