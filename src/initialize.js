@@ -2,28 +2,12 @@ import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
 import { MapControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
-import { Vector3 } from "three";
 
-/*
-create threejs scene, populate global variables
-*/
-// const container;
-function initialize() {
+function initialize(mode) {
 	//initializes threeJS scene.
-	//variables:
-	// color_buildings = config.color_buildings;
-	//background_color is a hexadecimal value of the threejs scene's background
-	let list = document.getElementsByClassName("c-header__grid");
-	// console.log(x);
-	for (var i = 0; i < list.length; i++) {
-		// console.log( ); //second console output
-		list[i].style.width = window.innerWidth / 2 + "px";
-	}
-	// x.forEach((el) => {
-	// 	el.style.width = "100";
-	// });
-	//local variables
-	const container = document.getElementById($.config.container);
+	$.container = document.getElementById($.config.container);
+	$.containerSize.x = container.clientWidth;
+	$.containerSize.y = container.clientHeight;
 
 	//initialize threejs scene
 	$.scene = new THREE.Scene();
@@ -32,27 +16,27 @@ function initialize() {
 	//initialize threejs camera
 	$.camera = new THREE.PerspectiveCamera(
 		25,
-		window.innerWidth / 2 / window.innerHeight,
+		$.containerSize.x / $.containerSize.y,
 		0.1,
 		2000,
 	);
-	// $.camera.position.set(8, 2, 1);
-	$.camera.position.set($.cameraPos.x, $.cameraPos.y, $.cameraPos.z);
 
-	//RAYCASTING
-	// const geometryHelper = new THREE.ConeGeometry(20, 100, 3);
-	// geometryHelper.translate(0, 50, 0);
-	// geometryHelper.rotateX(Math.PI / 2);
-	// helper = new THREE.Mesh(geometryHelper, new THREE.MeshNormalMaterial());
-	// scene.add(helper);
-	// container.addEventListener("pointermove", onPointerMove);
+	if (mode == "setup") {
+		$.camera.position.set(8, 2, 1);
+		$.camera.lookAt(0, 0, 0);
+	} else {
+		$.camera.position.set($.cameraPos.x, $.cameraPos.y, $.cameraPos.z);
+		$.camera.lookAt(
+			$.cameraLookStartPos.x,
+			$.cameraLookStartPos.y,
+			$.cameraLookStartPos.z,
+		);
+	}
 
-	// //initialize group
-	// iR = new THREE.Group();
-	// iR = "Interactive Root";
+	$.camera.layers.enable(0); //everything
+	$.camera.layers.enable(1); //roads
 
 	//initialize lights
-	// const light1 = new THREE.AmbientLight(0xfafafa, 0.25);
 	let light0 = new THREE.AmbientLight(0xfafafa, 0.25);
 
 	let light1 = new THREE.PointLight(0xfafafa, 0.4);
@@ -68,7 +52,7 @@ function initialize() {
 	//initialize renderer
 	$.renderer = new THREE.WebGLRenderer({ antialias: true });
 	$.renderer.setPixelRatio(window.devicePixelRatio);
-	$.renderer.setSize(window.innerWidth / 2, window.innerHeight);
+	$.renderer.setSize($.containerSize.x, $.containerSize.y);
 
 	container.appendChild($.renderer.domElement);
 
@@ -81,15 +65,6 @@ function initialize() {
 		// const lightHelper1 = new THREE.PointLightHelper(light1);
 		// const lightHelper2 = new THREE.PointLightHelper(light2);
 		// $.scene.add(lightHelper0, lightHelper1, lightHelper2);
-
-		//const gridHelper
-		let grid = new THREE.GridHelper(
-			100,
-			150,
-			new THREE.Color(0x555555),
-			new THREE.Color(0x333333),
-		);
-		$.scene.add(grid);
 
 		//axis
 		// const axesHelper = new THREE.AxesHelper(5);
@@ -107,13 +82,27 @@ function initialize() {
 		$.controls.screenSpacePanning = false;
 		$.controls.maxDistance = 800;
 		// controls.update(); //runs in animate()
+	} else {
+		//const gridHelper
+		let grid = new THREE.GridHelper(
+			100,
+			150,
+			new THREE.Color(0x555555),
+			new THREE.Color(0x333333),
+		);
+		grid.layers.set(0);
+		$.scene.add(grid);
 	}
 }
 
 function resize() {
-	$.camera.aspect = window.innerWidth / 2 / window.innerHeight;
+	$.container = document.getElementById($.config.container);
+	$.containerSize.x = container.clientWidth;
+	$.containerSize.y = container.clientHeight;
+
+	$.camera.aspect = $.containerSize.x / $.containerSize.y;
 	$.camera.updateProjectionMatrix();
-	$.renderer.setSize(window.innerWidth / 2, window.innerHeight);
+	$.renderer.setSize($.containerSize.x, $.containerSize.y);
 }
 
 function animate() {

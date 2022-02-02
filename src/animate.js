@@ -1,10 +1,7 @@
 import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
-// import * as GEOLIB from "geolib";
-import { Line2 } from "three/examples/jsm/lines/Line2.js";
-import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
-import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
 
+//globals
 const animationScripts = [];
 let LINEPOINTCOUNT = 0;
 let STARTPOINT = 3;
@@ -33,10 +30,10 @@ async function animatePath() {
 	data.forEach((el) => {
 		lineArrayVector3.push(new THREE.Vector3(el[0], el[1], el[2]));
 	});
-	// drawSpline(lineArrayVector3);
+	drawSpline(lineArrayVector3);
 
 	drawLine();
-
+	// $.camera.lookAt($.line);
 	initializeEventListeners();
 	animate();
 }
@@ -53,22 +50,35 @@ async function loadPath() {
 async function drawSpline(data) {
 	// let data = await loadPath();
 
-	const curve = new THREE.CatmullRomCurve3(data);
-	const points = curve.getPoints(50);
+	// const curve = new THREE.CatmullRomCurve3(data);
+	$.cameraPath = new THREE.CatmullRomCurve3(data);
 
-	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	//ACTUALLY DRAW IT.
+	// spawnSpline();
+	function spawnSpline() {
+		const points = $.cameraPath.getPoints(50);
 
-	const material = new THREE.LineDashedMaterial({
-		color: 0xffffff,
-		linewidth: 1,
-		scale: 1,
-		dashSize: 1, // to be updated in the render loop
-		gapSize: 1e10, // a big number, so only one dash is rendered
-	});
+		const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
-	const curveObject = new THREE.Line(geometry, material);
+		const material = new THREE.LineBasicMaterial({
+			color: 0xffffff,
+			linewidth: 1,
+			transparent: false,
+			opacity: 1,
+		});
+		// const material = new THREE.LineDashedMaterial({
+		// 	color: 0xffffff,
+		// 	linewidth: 1,
+		// 	scale: 1,
+		// 	// dashSize: 1, // to be updated in the render loop
+		// 	// gapSize: 1e10, // a big number, so only one dash is rendered
+		// });
 
-	$.scene.add(curveObject);
+		// const curveObject = new THREE.Line(geometry, material);
+		let line = new THREE.Line(geometry, material);
+
+		$.scene.add(line);
+	}
 }
 
 //ANIMATED PATH
@@ -86,7 +96,8 @@ function drawLine() {
 	});
 
 	$.line = new THREE.Line(geometry, material);
-	$.line.geometry.setDrawRange(0, 2);
+	$.line.geometry.setDrawRange(0, 1);
+	$.line.frustumCulled = false;
 	$.scene.add($.line);
 }
 
@@ -135,8 +146,8 @@ function animate() {
 	requestAnimationFrame(animate);
 	playScrollAnimations();
 
-	$.camera.lookAt($.cameraLookAtPos);
-	// $.camera.position.set($.cameraLookAtPos.x - 1, 2, $.cameraLookAtPos.z - 1);
+	// $.camera.lookAt($.cameraLookAtPos);
+	// $.camera.position.set($.cameraPos.x, 2, $.cameraPos.z);
 }
 
 function playScrollAnimations() {
@@ -148,78 +159,124 @@ function playScrollAnimations() {
 }
 
 //add an animation that moves the cube through first 40 percent of scroll
-//DRAW PATH ANIMATION
+//PATH ANIMATION
 animationScripts.push({
-	start: 15,
+	start: 10,
 	end: 99,
 	func: () => {
 		let x = 1 / LINEPOINTCOUNT;
-		let linePercent = scalePercent(15, 99) / x;
+		let linePercent = scalePercent(10, 99) / x;
 		let lineInt = parseInt(linePercent);
 		let lineFloat = linePercent - lineInt;
 		// console.log(lineFloat);
 
 		$.line.geometry.setDrawRange(0, linePercent);
 		updateLine(lineInt, lineFloat);
+
+		function updateLine(index, percentage) {
+			let a = new THREE.Vector3(
+				$.lineArrayBackup[index * 3 - 3],
+				$.lineArrayBackup[index * 3 - 2],
+				$.lineArrayBackup[index * 3 - 1],
+			);
+
+			let b = new THREE.Vector3(
+				$.lineArrayBackup[(index + 1) * 3 - 3],
+				$.lineArrayBackup[(index + 1) * 3 - 2],
+				$.lineArrayBackup[(index + 1) * 3 - 1],
+			);
+
+			$.cameraLookAtPos = new THREE.Vector3().lerpVectors(
+				a,
+				b,
+				percentage,
+			);
+
+			$.lineArray[index * 3 - 3] = $.cameraLookAtPos.x;
+			$.lineArray[index * 3 - 2] = $.cameraLookAtPos.y;
+			$.lineArray[index * 3 - 1] = $.cameraLookAtPos.z;
+
+			$.lineArray[(index - 1) * 3 - 3] = $.lineArrayBackup[index * 3 - 3];
+			$.lineArray[(index - 1) * 3 - 2] = $.lineArrayBackup[index * 3 - 2];
+			$.lineArray[(index - 1) * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
+
+			$.line.geometry.attributes.position.needsUpdate = true;
+
+			// $.lineArray = $.lineArrayBackup;
+
+			// for (let i = 0; i < index - 1; i++) {
+			// 	$.lineArray[index * 3 - 3] = $.lineArrayBackup[index * 3 - 3];
+			// 	$.lineArray[index * 3 - 2] = $.lineArrayBackup[index * 3 - 2];
+			// 	$.lineArray[index * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
+			// }
+
+			// for (let i = index; i < LINEPOINTCOUNT; i++) {
+			// 	$.lineArray[index * 3 - 3] = $.lineArrayBackup[index * 3 - 3];
+			// 	$.lineArray[index * 3 - 2] = $.lineArrayBackup[index * 3 - 2];
+			// 	$.lineArray[index * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
+			// }
+
+			// $.lineArray[(index - 1) * 3 - 3] = $.lineArrayBackup[(index - 1) * 3 - 3];
+			// $.lineArray[(index - 1) * 3 - 2] = $.lineArrayBackup[(index - 1) * 3 - 2];
+			// $.lineArray[(index - 1) * 3 - 1] = $.lineArrayBackup[(index - 1) * 3 - 1];
+
+			// $.lineArray[(index + 1) * 3 - 3] = $.lineArrayBackup[(index + 1) * 3 - 3];
+			// $.lineArray[(index + 1) * 3 - 2] = $.lineArrayBackup[(index + 1) * 3 - 2];
+			// $.lineArray[(index + 1) * 3 - 1] = $.lineArrayBackup[(index + 1) * 3 - 1];
+		}
 	},
 });
 
+//CAMERA ANIMATIONS
 animationScripts.push({
-	start: 1,
-	end: 20,
+	start: 0,
+	end: 101,
 	func: () => {
-		$.cameraPos.x = $.cameraPos.x = 0.1;
-
-		// $.camera.position.set($.cameraPos.x, $.cameraPos.y, $.cameraPos.z);
+		let percent = scalePercent(0, 101);
+		// setDrawRange
+		// cameraMoveToStart(percent);
+		// $.camera.lookAt($.cameraLookAtPos);
 	},
 });
 
-function updateLine(index, percentage) {
-	let a = new THREE.Vector3(
-		$.lineArrayBackup[index * 3 - 3],
-		$.lineArrayBackup[index * 3 - 2],
-		$.lineArrayBackup[index * 3 - 1],
-	);
-
+function cameraMoveToStart(percentage) {
 	let b = new THREE.Vector3(
-		$.lineArrayBackup[(index + 1) * 3 - 3],
-		$.lineArrayBackup[(index + 1) * 3 - 2],
-		$.lineArrayBackup[(index + 1) * 3 - 1],
+		$.lineArrayBackup[1 * 3 - 3] - 1,
+		$.lineArrayBackup[1 * 3 - 2],
+		$.lineArrayBackup[1 * 3 - 1] - 1,
 	);
 
-	$.cameraLookAtPos = new THREE.Vector3().lerpVectors(a, b, percentage);
+	$.cameraPos = new THREE.Vector3().lerpVectors(
+		$.cameraStartPos,
+		b,
+		percentage,
+	);
 
-	$.lineArray[index * 3 - 3] = $.cameraLookAtPos.x;
-	$.lineArray[index * 3 - 2] = $.cameraLookAtPos.y;
-	$.lineArray[index * 3 - 1] = $.cameraLookAtPos.z;
+	$.camera.position.set($.cameraPos.x, 2, $.cameraPos.z);
+	// $.camera.position.x = camPos.x;
+	// $.camera.position.y = camPos.y;
+	// $.camera.position.z = camPos.z;
+}
 
-	$.lineArray[(index - 1) * 3 - 3] = $.lineArrayBackup[index * 3 - 3];
-	$.lineArray[(index - 1) * 3 - 2] = $.lineArrayBackup[index * 3 - 2];
-	$.lineArray[(index - 1) * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
+function cameraFollowCurve(index, percentage, endPoint) {
+	// let x = 1 / LINEPOINTCOUNT;
+	// let linePercent = scalePercent(1, 20) / x;
 
-	$.line.geometry.attributes.position.needsUpdate = true;
+	let percent = scalePercent(1, 20);
 
-	// $.lineArray = $.lineArrayBackup;
+	// $.cameraPos.x = $.cameraPos.x = 0.1;
+	// $.camera.position.set($.cameraPos.x, $.cameraPos.y, $.cameraPos.z);
 
-	// for (let i = 0; i < index - 1; i++) {
-	// 	$.lineArray[index * 3 - 3] = $.lineArrayBackup[index * 3 - 3];
-	// 	$.lineArray[index * 3 - 2] = $.lineArrayBackup[index * 3 - 2];
-	// 	$.lineArray[index * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
-	// }
+	let camPos = $.cameraPath.getPoint(percent);
+	let camRot = $.cameraPath.getTangent(percent);
 
-	// for (let i = index; i < LINEPOINTCOUNT; i++) {
-	// 	$.lineArray[index * 3 - 3] = $.lineArrayBackup[index * 3 - 3];
-	// 	$.lineArray[index * 3 - 2] = $.lineArrayBackup[index * 3 - 2];
-	// 	$.lineArray[index * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
-	// }
+	$.camera.position.x = camPos.x;
+	// $.camera.position.y = camPos.y;
+	$.camera.position.z = camPos.z;
 
-	// $.lineArray[(index - 1) * 3 - 3] = $.lineArrayBackup[(index - 1) * 3 - 3];
-	// $.lineArray[(index - 1) * 3 - 2] = $.lineArrayBackup[(index - 1) * 3 - 2];
-	// $.lineArray[(index - 1) * 3 - 1] = $.lineArrayBackup[(index - 1) * 3 - 1];
-
-	// $.lineArray[(index + 1) * 3 - 3] = $.lineArrayBackup[(index + 1) * 3 - 3];
-	// $.lineArray[(index + 1) * 3 - 2] = $.lineArrayBackup[(index + 1) * 3 - 2];
-	// $.lineArray[(index + 1) * 3 - 1] = $.lineArrayBackup[(index + 1) * 3 - 1];
+	// $.camera.rotation.x = camRot.x;
+	// // $.camera.rotation.y = camRot.y;
+	// $.camera.rotation.z = camRot.z;
 }
 
 // Used to fit the lerps to start and end at specific scrolling percentages

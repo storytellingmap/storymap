@@ -1,71 +1,65 @@
 import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
 import * as GEOLIB from "geolib";
+import { Vector3 } from "three";
 
-let ground;
-//ground plane against which you'll raycast.
-function createGround(size = 100) {
-	const shape = new THREE.Shape();
+//globals
+let sphereMarker;
 
-	shape.moveTo(0, 0);
-	shape.lineTo(0, size);
-	shape.lineTo(size, size);
-	shape.lineTo(size, 0);
-
-	const geometry = new THREE.ShapeGeometry(shape);
-	geometry.rotateX(Math.PI / 2);
-	geometry.rotateZ(Math.PI);
-	let half = size / 2;
-	geometry.translate(half, 0.0001, -half); //why is threejs so retarded. why is it xzy
-
-	// const mesh = new THREE.Mesh(geometry, material);
-	ground = new THREE.Mesh(geometry, $.material_ground);
-	ground.name = "GROUND";
-	// mesh.translateY(-51.0442347);
-	// mesh.setRotationFromAxisAngle(-90);
-	$.scene.add(ground);
+function initializeMarker() {
+	const geometry = new THREE.SphereGeometry(0.025);
+	const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+	sphereMarker = new THREE.Mesh(geometry, material);
+	sphereMarker.visible = false;
+	$.scene.add(sphereMarker);
 }
 
 function initializeEventListeners() {
-	scrollPercentage();
-	keyPress();
+	// window.addEventListener("mousemove", onMouseMove, false);
 
-	function scrollPercentage() {
-		//initialize scrollPercentage text
-		document.getElementById("scrollProgress").innerText =
-			"Scroll Progress : 00.00";
+	let drag = false;
+	document.addEventListener("mousedown", () => (drag = false));
 
-		document.addEventListener("scroll", getScrollPercentage, false);
-
-		function getScrollPercentage() {
-			$.scrollpercentage =
-				((document.documentElement.scrollTop ||
-					document.body.scrollTop) /
-					((document.documentElement.scrollHeight ||
-						document.body.scrollHeight) -
-						document.documentElement.clientHeight)) *
-				100;
-			document.getElementById("scrollProgress").innerText =
-				"Scroll Progress : " + $.scrollpercentage.toFixed(2);
+	document.addEventListener("mousemove", () => {
+		castRay();
+		if ($.hit == true) {
+			updateLine($.mouseposition);
+		} else {
+			$.line.geometry.setDrawRange(0, $.lineClickCounter);
 		}
+		drag = true;
+	});
 
-		function showScrollPercentage() {}
-	}
+	document.addEventListener("click", () => {
+		if (!drag && $.hit == true) {
+			addPoint($.mouseposition);
+			$.lineClickMax = $.lineClickCounter;
+		}
+	});
 
-	function keyPress() {
-		document.addEventListener("keyup", onKeyUp, false);
+	document.addEventListener("keyup", onKeyUp, false);
 
-		function onKeyUp(event) {
-			if (event.key == "s") {
-				console.log("start drawing path");
-				window.addEventListener("click", addRaycaster, false);
-				window.addEventListener("mousemove", onMouseMove, false);
+	function onKeyUp(event) {
+		if (event.key == "s") {
+			savePath();
+		}
+		if (event.key == "r") {
+			//reset line
+			$.lineClickCounter = 0;
+			$.scene.remove($.line);
+			initializeDynamicLine();
+		}
+		if (event.key === "z") {
+			if ($.lineClickCounter != 0) {
+				// updateLine(new THREE.Vector3(0, 0, 0));
+				$.lineClickCounter = $.lineClickCounter - 1;
+				$.line.geometry.setDrawRange(0, $.lineClickCounter);
 			}
-			if (event.key == "f") {
-				console.log("finish and save path.");
-				window.removeEventListener("click", addRaycaster, false);
-				// window.removeEventListener("mousemove", onMouseMove, false);
-				savePath();
+		}
+		if (event.key === "x") {
+			if ($.lineClickCounter < $.lineClickMax) {
+				$.lineClickCounter = $.lineClickCounter + 1;
+				$.line.geometry.setDrawRange(0, $.lineClickCounter);
 			}
 		}
 	}
@@ -87,53 +81,10 @@ function initializeDynamicLine() {
 	});
 
 	$.line = new THREE.Line(geometry, material);
+	$.line.geometry.setDrawRange(0, 0);
+	$.line.frustumCulled = false;
+	$.line.name = "USERPATH";
 	$.scene.add($.line);
-
-	// document.addEventListener("mousemove", onMouseMove, false);
-	// document.addEventListener("mousedown", onMouseDown, false);
-}
-
-function addRaycaster(event) {
-	// calculate mouse position in normalized device coordinates
-	// (-1 to +1) for both components
-	$.mouseposition.x = (event.clientX / window.innerWidth) * 2 - 1;
-	$.mouseposition.y = -(event.clientY / window.innerHeight) * 2 + 1;
-	// console.log(mousePos);
-
-	$.raycaster.setFromCamera($.mouseposition, $.camera);
-	let found = $.raycaster.intersectObjects($.scene.children);
-	// console.log(found.length);
-	if (found.length > 0) {
-		// console.log(1);
-		found.forEach((ray) => {
-			// console.log(ray);
-			if (ray.object.name == "GROUND") {
-				// placeBox(ray.point);
-				// createLine(ray.point);
-				if ($.lineClickCounter === 0) {
-					addPoint(ray.point); //hack to add to identical points.
-				}
-				addPoint(ray.point);
-			}
-		});
-	}
-
-	// add point
-	function addPoint(mouse) {
-		$.lineArray[$.lineClickCounter * 3 + 0] = mouse.x;
-		$.lineArray[$.lineClickCounter * 3 + 1] = mouse.y;
-		$.lineArray[$.lineClickCounter * 3 + 2] = mouse.z;
-		$.lineClickCounter++;
-		$.line.geometry.setDrawRange(0, $.lineClickCounter);
-		updateLine(mouse);
-	}
-	// update line
-	function updateLine(mouse) {
-		$.lineArray[$.lineClickCounter * 3 + 0] = mouse.x;
-		$.lineArray[$.lineClickCounter * 3 + 1] = mouse.y;
-		$.lineArray[$.lineClickCounter * 3 + 2] = mouse.z;
-		$.line.geometry.attributes.position.needsUpdate = true;
-	}
 }
 
 function savePath() {
@@ -162,10 +113,8 @@ function savePath() {
 }
 
 function onMouseMove(event) {
+	//update mouseposition & sphere position
 	castRay(event);
-	if ($.lineClickCounter !== 0) {
-		updateLine($.mouseposition);
-	}
 }
 
 function castRay() {
@@ -175,35 +124,45 @@ function castRay() {
 
 	mousePos.x = (event.clientX / window.innerWidth) * 2 - 1;
 	mousePos.y = -(event.clientY / window.innerHeight) * 2 + 1;
-	// console.log(mousePos);
 
 	raycaster.setFromCamera(mousePos, $.camera);
-	let found = raycaster.intersectObjects($.scene.children);
-	// console.log(found.length);
-	if (found.length > 0) {
-		// console.log(1);
-		found.forEach((ray) => {
-			// console.log(ray);
-			if (ray.object.name == "GROUND") {
-				// console.log(ray.point);
-				// placeBox(ray.point);
-				// createLine(ray.point);
-				$.mouseposition = ray.point;
-			}
-		});
+	raycaster.layers.set(1);
+	raycaster.params.Line.threshold = 0.01;
+
+	let intersects = [];
+	raycaster.intersectObjects($.scene.children, false, intersects);
+
+	if (intersects.length > 0) {
+		sphereMarker.position.copy(intersects[0].point);
+		sphereMarker.visible = true;
+		$.mouseposition = intersects[0].point;
+		$.hit = true;
+	} else {
+		sphereMarker.visible = false;
+		$.hit = false;
 	}
 }
 
+function addPoint(mouse) {
+	$.lineArray[$.lineClickCounter * 3 + 0] = mouse.x;
+	$.lineArray[$.lineClickCounter * 3 + 1] = mouse.y;
+	$.lineArray[$.lineClickCounter * 3 + 2] = mouse.z;
+	$.lineClickCounter++;
+	$.line.geometry.setDrawRange(0, $.lineClickCounter);
+	updateLine(mouse);
+}
+// update line
 function updateLine(mouse) {
-	$.lineArray[$.lineClickCounter * 3 - 3] = mouse.x;
-	$.lineArray[$.lineClickCounter * 3 - 2] = mouse.y;
-	$.lineArray[$.lineClickCounter * 3 - 1] = mouse.z;
+	$.lineArray[$.lineClickCounter * 3 + 0] = mouse.x;
+	$.lineArray[$.lineClickCounter * 3 + 1] = mouse.y;
+	$.lineArray[$.lineClickCounter * 3 + 2] = mouse.z;
 	$.line.geometry.attributes.position.needsUpdate = true;
+	$.line.geometry.setDrawRange(0, $.lineClickCounter + 1);
 }
 
 //main function
 function generatePath() {
-	createGround(50);
+	initializeMarker();
 	initializeEventListeners();
 	initializeDynamicLine();
 }

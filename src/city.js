@@ -2,7 +2,7 @@ import { GLOBAL as $ } from "./globals";
 import * as THREE from "three";
 import * as GEOLIB from "geolib";
 import { mergeBufferGeometries } from "three/examples/jsm/utils/BufferGeometryUtils";
-import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
+// import { LineGeometry } from "three/examples/jsm/lines/LineGeometry";
 
 async function loadGeoJsonAsync() {
 	return await fetch($.config.data).then((response) => {
@@ -12,80 +12,29 @@ async function loadGeoJsonAsync() {
 	});
 }
 
-async function generateCity(buildings = true, roads = true, water = true) {
-	// LOAD GEOJSON DATA
-	let data = await loadGeoJsonAsync();
-	// console.log(data);
-
-	// LOADBUILDINGS
-	//foreach building, call the addBuilding function
-	data.forEach((element) => {
-		create3dObject(element);
-		// if (element.properties.building) {
-		// 	generateBuildings();
-		// 	// create3dObject(element);
-		// 	// addBuilding(
-		// 	// 	element.geometry.coordinates,
-		// 	// 	element.properties["building:levels"],
-		// 	// 	element.properties,
-		// 	// );
-		// 	// console.log("bla");
-		// }
-	});
-
-	// console.log($.buildingArray.length);
-	spawnBuildings();
-	spawnWater();
-}
-
-function spawnBuildings() {
-	let mergedGeometry = mergeBufferGeometries($.buildingArray);
-
-	const material = new THREE.MeshPhongMaterial({
-		color: $.config.color_buildings,
-	});
-	const mesh = new THREE.Mesh(mergedGeometry, material);
-	mesh.name = "BUILDINGS";
-	mesh.updateMatrix();
-	// buildingGeometry.merge(mesh);
-
-	// console.log(mesh);
-	$.scene.add(mesh);
-}
-
-function spawnWater() {
-	let mergedGeometry = mergeBufferGeometries($.waterArray);
-
-	const material = new THREE.MeshPhongMaterial({
-		color: 0x0000ff,
-	});
-	const mesh = new THREE.Mesh(mergedGeometry, material);
-	mesh.name = "WATER";
-	mesh.updateMatrix();
-	// buildingGeometry.merge(mesh);
-	mesh.position.y -= 0.01;
-	// console.log(mesh);
-	$.scene.add(mesh);
-}
-
-function create3dObject(data) {
+function create3dObjects(data) {
 	let coordinates = data.geometry.coordinates;
 	let properties = data.properties;
 
 	if (properties.building) {
 		//if data is a building property (if it's a building)
 		let building_levels = data.properties["building:levels"] || 1; //if building:levels property exists use it, otherwise use 1
-
-		$.buildingArray.push(generateBuildings(coordinates, building_levels));
-		// generateBuildingV2(coordinates, building_levels);
+		$.buildingArray.push(generateBuilding(coordinates, building_levels));
 	} else if (properties.highway && data.geometry.type != "Point") {
-		generateRoads(coordinates, properties);
+		let road = generateRoad(coordinates, properties);
+		if (road != undefined) {
+			$.roadArray.push(road);
+		}
 	} else if (properties.natural) {
 		$.waterArray.push(generateWater(coordinates, properties));
+	} else if (properties.leisure) {
+		//test green
+		$.greenArray.push(generateGreen(coordinates));
 	}
 }
 
-function generateBuildings(coordinates, height = 1) {
+// GENERATE SHAPE AND FILL UP ARRAYS
+function generateBuilding(coordinates, height = 1) {
 	//each geojson "object" has multiple arrays of coordinates.
 	//the first array is the main (outer) building shape
 	//the second & third & .. are the "holes" in the building
@@ -108,38 +57,35 @@ function generateBuildings(coordinates, height = 1) {
 	return buildingGeometry;
 }
 
-function generateRoads(coordinates, properties) {
+function generateRoad(coordinates, properties, height = 0.002) {
 	// console.log(1);
 	let points = [];
 
-	coordinates.forEach((coordinates) => {
-		let coords = normalizeCoordinates(coordinates, $.config.citycenter);
-		points.push(new THREE.Vector3(coords[0], 0.002, coords[1]));
-		// console.log(points);
-		// if (element[0][1]) return;
-		// if (!element[0] || !element[1]) return;
-		// else {
-		// }
-		// console.log(element);
-	});
+	//check if multi-point road, not a point.
+	if (coordinates.length > 1) {
+		coordinates.forEach((coordinates) => {
+			let coords = normalizeCoordinates(coordinates, $.config.citycenter);
+			// points.push(new THREE.Vector3(coords[0], height, coords[1])); //old way
+			points.push(coords[0], height, coords[1]);
+		});
 
-	if (points.length > 1) {
-		let geometry = new THREE.BufferGeometry().setFromPoints(points);
+		// NEW WAY
+		let geometry = new THREE.BufferGeometry();
+		geometry.setAttribute(
+			"position",
+			new THREE.Float32BufferAttribute(points, 3),
+		);
+
+		//OLD WAY
+		// let geometry = new THREE.BufferGeometry().setFromPoints(points);
 		geometry.rotateZ(Math.PI);
-		// return geometry;
-		let line = new THREE.Line(geometry, $.material_road);
-		// line.ExtrudeBufferGeometry();
-		$.scene.add(line);
-		// console.log("end of road");
-		//V2
-		// let geometry = new LineGeometry();
-		// geometry.setPositions(points);
-		// line = new Line2(geometry, $.material_road2);
-		// scene.add(line);
+		return geometry;
+	} else {
+		return undefined;
 	}
 }
 
-function generateWater(coordinates, properties) {
+function generateWater(coordinates, properties, height = 0.002) {
 	//each geojson "object" has multiple arrays of coordinates.
 	//the first array is the main (outer) building shape
 	//the second & third & .. are the "holes" in the building
@@ -158,11 +104,33 @@ function generateWater(coordinates, properties) {
 		}
 	});
 
-	waterGeometry = generateGeometry(waterShape, 0.001);
+	waterGeometry = generateGeometry(waterShape, height);
 	return waterGeometry;
 }
 
-//GENERICS
+function generateGreen(coordinates, height = 0) {
+	//each geojson "object" has multiple arrays of coordinates.
+	//the first array is the main (outer) building shape
+	//the second & third & .. are the "holes" in the building
+	let greenShape, greenGeometry; //main building
+	// let buildingHoles = []; //holes to punch out shape
+
+	coordinates.forEach((points, index) => {
+		//for each building do:
+		if (index == 0) {
+			//create main building shape
+			greenShape = generateShape(points);
+		} else {
+			//create shape of holes in building
+			greenShape.holes.push(generateShape(points));
+			// buildingHoles.push(generateShape(points));
+		}
+	});
+
+	greenGeometry = generateGeometry(greenShape, height);
+	return greenGeometry;
+}
+
 function generateShape(polygon) {
 	let shape = new THREE.Shape(); //only a single polygon?
 
@@ -206,25 +174,62 @@ function generateGeometry(shape, height) {
 	// $.scene.add(mesh);
 }
 
-function generatePath(polygon) {
-	let path = new THREE.Path();
-	// path.lineTo()
+//SPAWN GENERATED OBJECTS
+function spawnBuildings() {
+	let mergedGeometry = mergeBufferGeometries($.buildingArray);
 
-	polygon.forEach((coordinates, index) => {
-		let coords = normalizeCoordinates(coordinates, $.config.citycenter);
-		if (index == 0) {
-			path.moveTo(coords[0], coords[1]);
-		} else {
-			path.lineTo(coords[0], coords[1]);
-		}
-
-		// console.log(coordinates);
-		// shape.moveTo(coordinates[0], coordinates[1]);
+	const material = new THREE.MeshPhongMaterial({
+		color: $.config.color_buildings,
 	});
-
-	return path;
+	const mesh = new THREE.Mesh(mergedGeometry, material);
+	mesh.name = "BUILDINGS";
+	mesh.updateMatrix();
+	// buildingGeometry.merge(mesh);
+	mesh.layers.set(0);
+	// console.log(mesh);
+	$.scene.add(mesh);
 }
 
+function spawnRoads() {
+	$.roadArray.forEach((road, index) => {
+		let line = new THREE.Line(road, $.material_road);
+		line.name = "ROAD" + index;
+		line.layers.set(1);
+		$.scene.add(line);
+	});
+
+	// for (let index = 0; index < 50; index++) {
+	// 	console.log($.roadArray[index]);
+	// }
+}
+
+function spawnWater() {
+	let mergedGeometry = mergeBufferGeometries($.waterArray);
+
+	const mesh = new THREE.Mesh(mergedGeometry, $.material_water);
+	mesh.name = "WATER";
+	mesh.updateMatrix();
+
+	mesh.position.y -= 0.01;
+	mesh.layers.set(0);
+
+	$.scene.add(mesh);
+}
+
+function spawnGreen() {
+	let mergedGeometry = mergeBufferGeometries($.greenArray);
+
+	const mesh = new THREE.Mesh(mergedGeometry, $.material_green);
+	mesh.name = "GREEN";
+	mesh.updateMatrix();
+
+	mesh.position.y -= 0.01;
+	mesh.layers.set(0);
+
+	$.scene.add(mesh);
+}
+
+//GENERAL FUNCTION
 function normalizeCoordinates(objectPosition, centerPosition) {
 	// Get GPS distance
 	let dis = GEOLIB.getDistance(objectPosition, centerPosition);
@@ -240,6 +245,36 @@ function normalizeCoordinates(objectPosition, centerPosition) {
 
 	// Reverse X (it work)
 	return [-x / 100, y / 100];
+}
+
+//main function
+async function generateCity(
+	buildings = true,
+	roads = true,
+	water = true,
+	green = true,
+) {
+	// LOAD GEOJSON DATA
+	let data = await loadGeoJsonAsync();
+	// console.log(data);
+
+	//generate shapes, meshes and lines
+	data.forEach((element) => {
+		create3dObjects(element);
+	});
+
+	if (buildings) {
+		spawnBuildings();
+	}
+	if (roads) {
+		spawnRoads();
+	}
+	if (water) {
+		spawnWater();
+	}
+	if (green) {
+		spawnGreen();
+	}
 }
 
 export { generateCity };

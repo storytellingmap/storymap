@@ -15,7 +15,6 @@ Click on Export and save as geojson.
 [timeout:30];
 
 (
-
 way["building"]({{bbox}});
 relation["building"]["type"="multipolygon"]({{bbox}});
 
@@ -26,6 +25,9 @@ way["natural"="water"]({{bbox}});
 way["water"="lake"]({{bbox}});
 way["natural"="coastline"]({{bbox}});
 way["waterway"="riverbank"]({{bbox}});
+
+way["leisure"="park"]({{bbox}});
+way["leisure"="garden"]({{bbox}});
 );
 
 out;
@@ -41,18 +43,15 @@ You can use Google Maps to get this data.
 install the package using npm
 
 ```
-npm install storymaps
+npm install https://github.com/elfensky/storymap
 ```
 
 Then, import it in your javascript, create a configuration and start the setup.
 
-data: path to your geojson
-
-path: change after setup
-
-container: the id of the div where you want to place the canvas
-
-citycenter: array of [longitude, latitude] of the center of your area
+-   data: path to your geojson
+-   path: change after setup
+-   container: the id of the div where you want to place the canvas
+-   citycenter: array of [longitude, latitude] of the center of your area
 
 ```
 import * as storymaps from "./js/storymaps";

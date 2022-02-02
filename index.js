@@ -4,17 +4,33 @@ import { generateCity } from "./src/city";
 import { generatePath } from "./src/path";
 import { animatePath } from "./src/animate";
 
-function setup() {
-	initialize(); //create threejs scene, populate global variables
+async function setup(
+	config = {
+		mode: "setup",
+		buildings: true,
+		roads: true,
+		water: true,
+		green: true,
+	},
+) {
+	initialize(config.mode); //create threejs scene, populate global variables
 	animate(); //animation loop
-	generateCity(); //create 3D city from geojson data
+	generateCity(config.buildings, config.roads, config.water, config.green); //create 3D city from geojson data
 	generatePath(); //create menu/code to draw a path in the city
 }
 
-function start() {
-	initialize(); //create threejs scene, populate global variables
+async function start(
+	config = {
+		mode: "animate",
+		buildings: true,
+		roads: false,
+		water: true,
+		green: true,
+	},
+) {
+	initialize(config.mode); //create threejs scene, populate global variables
 	animate();
-	generateCity();
+	generateCity(config.buildings, config.roads, config.water, config.green);
 	animatePath(); //animates the created path from setup
 }
 

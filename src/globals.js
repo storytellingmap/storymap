@@ -2,28 +2,48 @@ import * as THREE from "three";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial";
 
 export const GLOBAL = {
+	container: null,
+	containerSize: new THREE.Vector2(),
+
 	scene: null,
+
 	camera: null,
-	cameraLookAtPos: new THREE.Vector3(0, 0, 0),
-	cameraPos: new THREE.Vector3(8, 2, 1),
+	cameraLookAtPos: new THREE.Vector3(
+		13.277194023132324,
+		-0.0020000000949949026,
+		6.823965549468994,
+	),
+	cameraLookStartPos: new THREE.Vector3(
+		13.277194023132324,
+		-0.0020000000949949026,
+		6.823965549468994,
+	),
+	cameraStartPos: new THREE.Vector3(10, 10, 6),
+	cameraPos: new THREE.Vector3(10, 10, 6),
+	cameraPath: null,
+
 	renderer: null,
 	controls: null,
 	stats: null,
+
 	buildingArray: [],
 	roadArray: [],
 	waterArray: [],
+	greenArray: [],
 
 	scrollpercentage: 0,
 	line: null,
 	lineArray: [],
 	lineArrayBackup: [],
 	lineClickCounter: 0,
-	mouseposition: new THREE.Vector2(),
+	lineClickMax: 0,
+	mouseposition: new THREE.Vector3(),
 	raycaster: new THREE.Raycaster(),
+	hit: false,
 
 	config: {
 		debug: true,
-		data: "/node_modules/storymap/sample/bruges.geojson",
+		data: "/node_modules/storymap/sample/small.geojson",
 		path: "/node_modules/storymap/sample/path.json",
 		container: "container",
 		citycenter: [3.227183, 51.209651],
@@ -39,17 +59,19 @@ export const GLOBAL = {
 		opacity: 0.25,
 	}),
 	material_road: new THREE.LineBasicMaterial({
-		color: 0x00ff00,
+		color: 0xffffff,
+		transparent: true,
+		linewidth: 1,
+		opacity: 0.25,
+	}),
+	material_water: new THREE.MeshPhongMaterial({
+		color: 0x42a5f5,
 		transparent: false,
-		linewidth: 10,
 		opacity: 1,
 	}),
-	material_road2: new LineMaterial({
-		color: 0xffffff,
-		linewidth: 5, // in world units with size attenuation, pixels otherwise
-		vertexColors: true,
-		//resolution:  // to be set by renderer, eventually
-		dashed: false,
-		alphaToCoverage: false,
+	material_green: new THREE.MeshPhongMaterial({
+		color: 0x81c784,
+		transparent: false,
+		opacity: 1,
 	}),
 };
