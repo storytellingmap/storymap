@@ -8,16 +8,8 @@ export const GLOBAL = {
 	scene: null,
 
 	camera: null,
-	cameraLookAtPos: new THREE.Vector3(
-		13.277194023132324,
-		-0.0020000000949949026,
-		6.823965549468994,
-	),
-	cameraLookStartPos: new THREE.Vector3(
-		13.277194023132324,
-		-0.0020000000949949026,
-		6.823965549468994,
-	),
+	cameraLookAtPos: new THREE.Vector3(13, 0, 6),
+	cameraLookStartPos: [13, 0, 6],
 	cameraStartPos: new THREE.Vector3(10, 10, 6),
 	cameraPos: new THREE.Vector3(10, 10, 6),
 	cameraPath: null,
@@ -43,7 +35,7 @@ export const GLOBAL = {
 
 	config: {
 		debug: true,
-		data: "/node_modules/storymap/sample/small.geojson",
+		data: "/node_modules/storymap/sample/bruges.geojson",
 		path: "/node_modules/storymap/sample/path.json",
 		container: "container",
 		citycenter: [3.227183, 51.209651],

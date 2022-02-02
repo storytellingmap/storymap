@@ -13,7 +13,7 @@ async function setup(
 		green: true,
 	},
 ) {
-	initialize(config.mode); //create threejs scene, populate global variables
+	initialize(); //create threejs scene, populate global variables
 	animate(); //animation loop
 	generateCity(config.buildings, config.roads, config.water, config.green); //create 3D city from geojson data
 	generatePath(); //create menu/code to draw a path in the city
@@ -21,16 +21,15 @@ async function setup(
 
 async function start(
 	config = {
-		mode: "animate",
 		buildings: true,
-		roads: false,
+		roads: true,
 		water: true,
 		green: true,
 	},
 ) {
-	initialize(config.mode); //create threejs scene, populate global variables
+	initialize(); //create threejs scene, populate global variables
 	animate();
-	generateCity(config.buildings, config.roads, config.water, config.green);
+	generateCity(config);
 	animatePath(); //animates the created path from setup
 }
 

@@ -57,7 +57,7 @@ function generateBuilding(coordinates, height = 1) {
 	return buildingGeometry;
 }
 
-function generateRoad(coordinates, properties, height = 0.002) {
+function generateRoad(coordinates, properties, height = 0) {
 	// console.log(1);
 	let points = [];
 
@@ -85,7 +85,7 @@ function generateRoad(coordinates, properties, height = 0.002) {
 	}
 }
 
-function generateWater(coordinates, properties, height = 0.002) {
+function generateWater(coordinates, properties, height = 0.007) {
 	//each geojson "object" has multiple arrays of coordinates.
 	//the first array is the main (outer) building shape
 	//the second & third & .. are the "holes" in the building
@@ -186,6 +186,7 @@ function spawnBuildings() {
 	mesh.updateMatrix();
 	// buildingGeometry.merge(mesh);
 	mesh.layers.set(0);
+	mesh.frustumCulled = false;
 	// console.log(mesh);
 	$.scene.add(mesh);
 }
@@ -195,6 +196,7 @@ function spawnRoads() {
 		let line = new THREE.Line(road, $.material_road);
 		line.name = "ROAD" + index;
 		line.layers.set(1);
+		line.frustumCulled = false;
 		$.scene.add(line);
 	});
 
@@ -212,7 +214,7 @@ function spawnWater() {
 
 	mesh.position.y -= 0.01;
 	mesh.layers.set(0);
-
+	mesh.frustumCulled = false;
 	$.scene.add(mesh);
 }
 
@@ -225,7 +227,7 @@ function spawnGreen() {
 
 	mesh.position.y -= 0.01;
 	mesh.layers.set(0);
-
+	mesh.frustumCulled = false;
 	$.scene.add(mesh);
 }
 
@@ -249,10 +251,7 @@ function normalizeCoordinates(objectPosition, centerPosition) {
 
 //main function
 async function generateCity(
-	buildings = true,
-	roads = true,
-	water = true,
-	green = true,
+	config = { buildings: true, roads: true, water: true, green: true },
 ) {
 	// LOAD GEOJSON DATA
 	let data = await loadGeoJsonAsync();
@@ -260,21 +259,25 @@ async function generateCity(
 
 	//generate shapes, meshes and lines
 	data.forEach((element) => {
-		create3dObjects(element);
+		create3dObjects(element, config);
 	});
 
-	if (buildings) {
-		spawnBuildings();
-	}
-	if (roads) {
-		spawnRoads();
-	}
-	if (water) {
-		spawnWater();
-	}
-	if (green) {
-		spawnGreen();
-	}
+	spawnBuildings();
+	spawnRoads();
+	spawnWater();
+	spawnGreen();
+	// if (config.buildings) {
+	// 	spawnBuildings();
+	// }
+	// if (config.roads) {
+	// 	spawnRoads();
+	// }
+	// if (config.water) {
+	// 	spawnWater();
+	// }
+	// if (config.green) {
+	// 	spawnGreen();
+	// }
 }
 
 export { generateCity };

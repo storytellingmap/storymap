@@ -4,7 +4,8 @@ import * as THREE from "three";
 //globals
 const animationScripts = [];
 let LINEPOINTCOUNT = 0;
-let STARTPOINT = 3;
+let DRAWRANGE = 0;
+let X = 0;
 
 async function animatePath() {
 	let data = await loadPath();
@@ -33,7 +34,6 @@ async function animatePath() {
 	drawSpline(lineArrayVector3);
 
 	drawLine();
-	// $.camera.lookAt($.line);
 	initializeEventListeners();
 	animate();
 }
@@ -158,17 +158,15 @@ function playScrollAnimations() {
 	});
 }
 
-//add an animation that moves the cube through first 40 percent of scroll
 //PATH ANIMATION
 animationScripts.push({
-	start: 10,
-	end: 99,
+	start: 1,
+	end: 101,
 	func: () => {
 		let x = 1 / LINEPOINTCOUNT;
-		let linePercent = scalePercent(10, 99) / x;
+		let linePercent = scalePercent(1, 101) / x;
 		let lineInt = parseInt(linePercent);
 		let lineFloat = linePercent - lineInt;
-		// console.log(lineFloat);
 
 		$.line.geometry.setDrawRange(0, linePercent);
 		updateLine(lineInt, lineFloat);
@@ -191,6 +189,13 @@ animationScripts.push({
 				b,
 				percentage,
 			);
+			$.camera.lookAt($.cameraLookAtPos);
+
+			$.camera.position.set(
+				$.cameraLookAtPos.x + 4,
+				$.cameraLookAtPos.y + 3,
+				$.cameraLookAtPos.z + 5,
+			);
 
 			$.lineArray[index * 3 - 3] = $.cameraLookAtPos.x;
 			$.lineArray[index * 3 - 2] = $.cameraLookAtPos.y;
@@ -201,7 +206,7 @@ animationScripts.push({
 			$.lineArray[(index - 1) * 3 - 1] = $.lineArrayBackup[index * 3 - 1];
 
 			$.line.geometry.attributes.position.needsUpdate = true;
-
+			/*
 			// $.lineArray = $.lineArrayBackup;
 
 			// for (let i = 0; i < index - 1; i++) {
@@ -223,60 +228,44 @@ animationScripts.push({
 			// $.lineArray[(index + 1) * 3 - 3] = $.lineArrayBackup[(index + 1) * 3 - 3];
 			// $.lineArray[(index + 1) * 3 - 2] = $.lineArrayBackup[(index + 1) * 3 - 2];
 			// $.lineArray[(index + 1) * 3 - 1] = $.lineArrayBackup[(index + 1) * 3 - 1];
+			*/
 		}
 	},
 });
 
 //CAMERA ANIMATIONS
-animationScripts.push({
-	start: 0,
-	end: 101,
-	func: () => {
-		let percent = scalePercent(0, 101);
-		// setDrawRange
-		// cameraMoveToStart(percent);
-		// $.camera.lookAt($.cameraLookAtPos);
-	},
-});
+// animationScripts.push({
+// 	start: 1,
+// 	end: 20,
+// 	func: () => {
+// 		let percentage = scalePercent(1, 20);
+// 		moveCameraToStart(percentage);
+// 	},
+// });
+// animationScripts.push({
+// 	start: 21,
+// 	end: 101,
+// 	func: () => {
+// 		let percentage = scalePercent(21, 101);
+// 		// cameraFollowCurve(percentage);
+// 	},
+// });
 
-function cameraMoveToStart(percentage) {
-	let b = new THREE.Vector3(
-		$.lineArrayBackup[1 * 3 - 3] - 1,
-		$.lineArrayBackup[1 * 3 - 2],
-		$.lineArrayBackup[1 * 3 - 1] - 1,
-	);
+// function cameraM
 
-	$.cameraPos = new THREE.Vector3().lerpVectors(
-		$.cameraStartPos,
-		b,
+function moveCameraToStart(percentage) {
+	let vector3 = new THREE.Vector3($.cameraLookStartPos);
+	$.cameraPos.x = new THREE.Vector3().lerpVectors(
+		vector3,
+		location,
 		percentage,
 	);
-
-	$.camera.position.set($.cameraPos.x, 2, $.cameraPos.z);
-	// $.camera.position.x = camPos.x;
-	// $.camera.position.y = camPos.y;
-	// $.camera.position.z = camPos.z;
+	$.camera.position.set($.cameraPos.x, $.cameraPos.y + 6, $.cameraPos.z);
 }
 
-function cameraFollowCurve(index, percentage, endPoint) {
-	// let x = 1 / LINEPOINTCOUNT;
-	// let linePercent = scalePercent(1, 20) / x;
-
-	let percent = scalePercent(1, 20);
-
-	// $.cameraPos.x = $.cameraPos.x = 0.1;
-	// $.camera.position.set($.cameraPos.x, $.cameraPos.y, $.cameraPos.z);
-
-	let camPos = $.cameraPath.getPoint(percent);
-	let camRot = $.cameraPath.getTangent(percent);
-
-	$.camera.position.x = camPos.x;
-	// $.camera.position.y = camPos.y;
-	$.camera.position.z = camPos.z;
-
-	// $.camera.rotation.x = camRot.x;
-	// // $.camera.rotation.y = camRot.y;
-	// $.camera.rotation.z = camRot.z;
+function cameraFollowCurve(percentage) {
+	let camPos = $.cameraPath.getPoint(percentage);
+	$.camera.position.set(camPos);
 }
 
 // Used to fit the lerps to start and end at specific scrolling percentages

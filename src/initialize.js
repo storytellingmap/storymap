@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { MapControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module";
 
-function initialize(mode) {
+function initialize() {
 	//initializes threeJS scene.
 	$.container = document.getElementById($.config.container);
 	$.containerSize.x = container.clientWidth;
@@ -21,17 +21,8 @@ function initialize(mode) {
 		2000,
 	);
 
-	if (mode == "setup") {
-		$.camera.position.set(8, 2, 1);
-		$.camera.lookAt(0, 0, 0);
-	} else {
-		$.camera.position.set($.cameraPos.x, $.cameraPos.y, $.cameraPos.z);
-		$.camera.lookAt(
-			$.cameraLookStartPos.x,
-			$.cameraLookStartPos.y,
-			$.cameraLookStartPos.z,
-		);
-	}
+	$.camera.position.set(0, 20, 0);
+	$.camera.lookAt($.cameraLookStartPos);
 
 	$.camera.layers.enable(0); //everything
 	$.camera.layers.enable(1); //roads
@@ -81,8 +72,7 @@ function initialize(mode) {
 		$.controls.dampingFactor = 0.25;
 		$.controls.screenSpacePanning = false;
 		$.controls.maxDistance = 800;
-		// controls.update(); //runs in animate()
-	} else {
+
 		//const gridHelper
 		let grid = new THREE.GridHelper(
 			100,
@@ -108,10 +98,10 @@ function resize() {
 function animate() {
 	requestAnimationFrame(animate);
 	$.renderer.render($.scene, $.camera);
-	$.controls.update();
 
 	if ($.config.debug == true) {
 		$.stats.update();
+		$.controls.update();
 	}
 }
 
