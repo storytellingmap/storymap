@@ -62,7 +62,7 @@ async function drawSpline(data) {
 
 		const material = new THREE.LineBasicMaterial({
 			color: 0xffffff,
-			linewidth: 1,
+			linewidth: 10,
 			transparent: false,
 			opacity: 1,
 		});
