@@ -188,6 +188,7 @@ function spawnBuildings() {
 	mesh.layers.set(0);
 	mesh.frustumCulled = false;
 	// console.log(mesh);
+	mesh.castShadow = true;
 	$.scene.add(mesh);
 }
 
@@ -231,6 +232,22 @@ function spawnGreen() {
 	$.scene.add(mesh);
 }
 
+function spawnGround() {
+	const geometry = new THREE.PlaneGeometry(50, 50);
+	const material = new THREE.MeshBasicMaterial({
+		color: 0xfafafa,
+		side: THREE.DoubleSide,
+	});
+
+	const plane = new THREE.Mesh(geometry, material);
+	plane.receiveShadow = true;
+	plane.rotation.x = Math.PI / 2;
+	plane.position.y -= 0.03;
+	// plane.position.y = 0;
+	// plane.position.x = 0;
+	$.scene.add(plane);
+}
+
 //GENERAL FUNCTION
 function normalizeCoordinates(objectPosition, centerPosition) {
 	// Get GPS distance
@@ -266,6 +283,7 @@ async function generateCity(
 	spawnRoads();
 	spawnWater();
 	spawnGreen();
+	spawnGround();
 	// if (config.buildings) {
 	// 	spawnBuildings();
 	// }

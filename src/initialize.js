@@ -28,23 +28,28 @@ function initialize() {
 	$.camera.layers.enable(1); //roads
 
 	//initialize lights
-	let light0 = new THREE.AmbientLight(0xfafafa, 0.25);
+	let light0 = new THREE.AmbientLight(0xffffff, 0.5);
 
-	let light1 = new THREE.PointLight(0xfafafa, 0.4);
-	light1.position.set(200, 90, 40);
+	let light1 = new THREE.PointLight(0xffffff, 0.5);
+	light1.position.set(500, 1000, 500);
+	light1.castShadow = true;
+	// light1.lookAt({ x: 0, y: 0, z: 0 });
 
 	let light2 = new THREE.PointLight(0xfafafa, 0.4);
 	light2.position.set(200, 90, -40);
 
 	$.scene.add(light0);
 	$.scene.add(light1);
-	$.scene.add(light2);
+	// $.scene.add(light2);
 
 	//initialize renderer
 	$.renderer = new THREE.WebGLRenderer({ antialias: true });
 	$.renderer.setPixelRatio(window.devicePixelRatio);
 	$.renderer.setSize($.containerSize.x, $.containerSize.y);
-
+	//enable shadows
+	$.renderer.shadowMap.enabled = true;
+	$.renderer.shadowMap.type = THREE.BasicShadowMap;
+	//add to dom
 	container.appendChild($.renderer.domElement);
 
 	//initialize resize
@@ -58,8 +63,8 @@ function initialize() {
 		// $.scene.add(lightHelper0, lightHelper1, lightHelper2);
 
 		//axis
-		// const axesHelper = new THREE.AxesHelper(5);
-		// $.scene.add(axesHelper);
+		const axesHelper = new THREE.AxesHelper(5);
+		$.scene.add(axesHelper);
 
 		//FPS COUNTER
 		$.stats = new Stats();
@@ -81,7 +86,7 @@ function initialize() {
 			new THREE.Color(0x333333),
 		);
 		grid.layers.set(0);
-		$.scene.add(grid);
+		// $.scene.add(grid);
 	}
 }
 

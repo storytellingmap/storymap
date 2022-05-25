@@ -51,7 +51,7 @@ export const GLOBAL = {
 		opacity: 0.25,
 	}),
 	material_road: new THREE.LineBasicMaterial({
-		color: 0xffffff,
+		color: 0x000000,
 		transparent: true,
 		linewidth: 1,
 		opacity: 0.25,
