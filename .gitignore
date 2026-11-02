@@ -16,5 +16,4 @@ package-lock.json
 .planning/milestone.lock
 .planning/research/.cache/
 .planning/intel/
-.planning/debug/
 .planning/ui-reviews/
