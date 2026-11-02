@@ -71,7 +71,7 @@ Deferred. Tracked, not in the v1.1 roadmap. Detailed requirements come from `/gs
 - **MONO-01**: The chosen `storytellingmap` org repos live in one open-source monorepo under `elfensky`
 - **MONO-02**: The monorepo carries an open-source licence that replaces `UNLICENSED`
 - **MONO-03**: Each migrated `storytellingmap` repo points to the monorepo
-- Open facts for Andrei: which of the eight org repos go in (the thesis and three demo repos are private), which
+- Open facts for Andrei: which of the eight org repos go in (four are private: `storytellingmap`, `thesis`, `demos`, `demo1-read-story`), which
   licence, and what happens to the private `storytellingmap` core package versus this repo
 
 ### v2.1 2022 review items
@@ -109,12 +109,31 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| HLTH-01 | Phase 1 | Pending |
+| HLTH-02 | Phase 1 | Pending |
+| HLTH-03 | Phase 1 | Pending |
+| HLTH-04 | Phase 1 | Pending |
+| TEST-01 | Phase 2 | Pending |
+| TEST-02 | Phase 2 | Pending |
+| FIX-01 | Phase 2 | Pending |
+| FIX-02 | Phase 2 | Pending |
+| FIX-03 | Phase 2 | Pending |
+| FIX-04 | Phase 2 | Pending |
+| FIX-05 | Phase 2 | Pending |
+| FIX-06 | Phase 2 | Pending |
+| DOCS-01 | Phase 4 | Pending |
+| DOCS-02 | Phase 4 | Pending |
+| DOCS-03 | Phase 4 | Pending |
+| DEPS-01 | Phase 3 | Pending |
+| DEPS-02 | Phase 3 | Pending |
+| DEPS-03 | Phase 3 | Pending |
+| DEPS-04 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Mapped to phases: 0
-- Unmapped: 19 ⚠️
+- Mapped to phases: 19
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-11-02*
-*Last updated: 2026-11-02 after initial definition*
+*Last updated: 2026-11-02 after roadmap creation*
