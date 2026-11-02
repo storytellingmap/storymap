@@ -5,3 +5,15 @@ dist-ssr
 *.local
 package-lock.json
 package-lock.json
+
+# Playwright MCP scratch output (UAT screenshots, snapshots)
+.playwright-mcp/
+
+# GSD runtime state (not planning documents)
+.gsd/
+.planning/state.json
+.planning/estimation-calibration.json
+.planning/milestone.lock
+.planning/research/.cache/
+.planning/intel/
+.planning/ui-reviews/
